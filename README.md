@@ -1,0 +1,55 @@
+# The Ultra
+
+A MonoGame remake for **Android** and **iOS** of *The Ultra*, the 1983 arcade shooter published by PSS for the Oric-1 and Oric Atmos.
+
+Written by **Paul F. Johnson**.
+
+![Splash](art/splash-1920x1080.png)
+
+## The game
+
+- **16 waves of aliens**, each with its own animated graphics and attack pattern: Marchers, Wavers, Swoopers, Bouncers, Orbiters, Zigzaggers, Loopers, Kamikazes, Centipedes, Spirallers, Raindrops, Pendulums, Phantoms, Crossfire, Hunters and the Ultra. After wave 16 the cycle repeats, faster and for more points.
+- **Gun overheating.** The machine gun heats up with every shot. If it reaches the limit it locks until it has cooled. The temperature carries over from one wave to the next, so you start each wave with the gun as hot as you left it.
+- Aliens score 10 to 85 points by wave. Diving aliens score double. You get an extra life every 10,000 points.
+- Oric-style presentation: a 240x224 screen, the eight Oric colours, a 6x8 character-cell font, and AY-style square-wave and noise sound effects synthesised at runtime.
+
+### High scores
+
+The Hall of Fame keeps the top 10 scores. If you make the table, you enter your name (up to 10 characters) on an on-screen keyboard or a hardware keyboard. The table is saved to the app's private storage (`LocalApplicationData/ultra_hiscores.txt`) as soon as you enter your name and is loaded again when the game starts, so scores carry over from one launch to the next.
+
+### Controls
+
+The game is locked to landscape. The Oric screen sits in the centre, with touch controls on either side:
+
+| Area | Action |
+| --- | --- |
+| Left panel, left half | Move left |
+| Left panel, right half | Move right |
+| Left panel, top | Pause |
+| Right panel | Fire (hold for rapid fire) |
+| Back button (Android) | Pause. Press again while paused to quit the game |
+
+Hardware keyboards and game pads also work: arrow keys, Space or Ctrl to fire, P to pause, Esc to go back.
+
+## Project layout
+
+| Project | Purpose |
+| --- | --- |
+| `Ultra.Core` | All game code (net10.0, MonoGame 3.8.5). It needs no content pipeline because graphics, font and sound are generated in code. |
+| `Ultra.Android` | Android host activity: fixed `SensorLandscape`, immersive full screen, adaptive icon, splash theme |
+| `Ultra.iOS` | iOS host: landscape only, app icon set, `LaunchScreen.storyboard` splash |
+| `tools/generate_art.py` | Regenerates every icon and splash image from the game's own sprite and font data (requires Pillow) |
+
+## Building
+
+```sh
+dotnet build Ultra.Android/Ultra.Android.csproj
+dotnet build Ultra.iOS/Ultra.iOS.csproj
+```
+
+You need the .NET 10 SDK with the `android` and `ios` workloads installed.
+
+## Credits
+
+- Original game: *The Ultra* by J.B. Marshall, published by PSS in 1983 for the Oric-1 and Atmos.
+- Remake: Paul F. Johnson.
