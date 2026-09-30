@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Ultra Support</title>
+<meta name="description" content="Help, FAQ, privacy and contact details for The Ultra, a remake of the 1983 PSS Oric arcade shooter for iPhone, iPad and Android.">
+<link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAIAAADdvvtQAAADPUlEQVR42u3dW1asMBAF0Kq7HKXzn0fur9pKA3lAyN6fLpsGPCZFCCECAAAAAACIiM/P4iTAXqX4hwFABwFoyQAAeIg8UzlWb6Vsfrw02cuDh9D8VJbhf5gy4G//4p//IQSI2wbIOAdVAcp0jtjwEUtW0RmHW96sO8ajH3+7A/V72OAY1UAoohEgBAhF9LgRzOw/QnrBCH3TLeTt91ALhAAhQAgQAgTjbmU8YUbQ8GM8PFsnh/8VzpxnLRC6MA/lCNAl0mQVAWLCItq9jDNbyINXEif2sIy/l6EFQoAQIAQIAYKDo2UfbmRccoyvPyvfP5HvvvC3PcyDe1j2HOP2aJkWKCxEHMMXVyhts5+b/4sntt+iBep7jM1/v1EL5GYqimji6U9lZOVt7dye71LeN7bd75sOqaK3+vGXU/rzEG4xHeiqFshtcF0YCBACBAAAMdvU33srzrGrMAQIAYLJA+RJZEW0IloLRKw4sV6A6DL9RoDQhSFAuAqb4ZorW1y1Zf/d0AKhCwMBQoAQIFyFvR3qvsOzgsW176QtkCdNdWEgQAgQ8fzXPa19UWFepBYIAUKAECAECAyqn17psnQ4hcVjPSBA4YUHujBdmBYIAYJwL6zTq8iKFggECAFivkW9BIioeU1Wrl5EG1zThSFACBACBAIEAEDUrlrj/RyKaAQIAUKAQIAQIAQIAYJWAVrteV4AwuIK0e5twg1Xy59rs4poBAgBAgFCgBAgBCiWWV8CAYqa9SXC6q0GEg0kaoEQIAQIwjK/tQXK0wsXLRAChABBPqdY+T56WLWprx/f8ztj9lYLhC4MBIgwDrS/WDmxqQFf8ZQ5AlogBAgBQg0UNx0Tqpys0+krtEAgQAgQaqC4amTlr49X3v8yDnTfUpcVA2QinwDBSuNAOzvNmqbxRL9sHAgECAEizInuetNqo7jpUYjs/LoTe6sFQhcGAkQYB2pS0PxVcAx4gMs4EMwUIC8Bchl/70eb592sFggt0PyLbA5YXMEimyz0aIoALdmLpAChBnrqvdin3w3VAiFACBACBAKEAD2S94W5jHcZrwVCgBAgNYQaSA2kBlo0QK0mQlizRg2EACFAAAAwl//MnfXX0ixmjgAAAABJRU5ErkJggg==">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=VT323&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f4f4ef;
+    --surface: #ffffff;
+    --text: #1c1c24;
+    --muted: #5b5b68;
+    --border: #d9d9d2;
+    --accent: #c40000;
+    --accent-ink: #ffffff;
+    --green: #0a7d20;
+    --code-bg: #eeeee6;
+    --screen: #000000;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #06061a;
+      --surface: #0e0e26;
+      --text: #ecece4;
+      --muted: #a4a4b8;
+      --border: #26264a;
+      --accent: #ff2a2a;
+      --accent-ink: #000000;
+      --green: #3cff5a;
+      --code-bg: #15153a;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #06061a;
+    --surface: #0e0e26;
+    --text: #ecece4;
+    --muted: #a4a4b8;
+    --border: #26264a;
+    --accent: #ff2a2a;
+    --accent-ink: #000000;
+    --green: #3cff5a;
+    --code-bg: #15153a;
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 16px/1.6 Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  a { color: var(--green); text-underline-offset: 3px; }
+  img { max-width: 100%; display: block; image-rendering: pixelated; }
+
+  .bar {
+    background: var(--accent);
+    color: var(--accent-ink);
+    font-family: VT323, ui-monospace, monospace;
+    font-size: 22px;
+    letter-spacing: .06em;
+    text-align: center;
+    padding: 6px 16px;
+  }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 0 16px; }
+
+  header.hero {
+    display: flex; gap: 24px; align-items: center;
+    padding: 40px 0 24px;
+  }
+  header.hero img { width: 112px; height: 112px; border-radius: 24px; flex: none; }
+  h1 {
+    margin: 0;
+    font-family: VT323, ui-monospace, monospace;
+    font-weight: 400;
+    font-size: clamp(44px, 9vw, 72px);
+    line-height: 1;
+    letter-spacing: .04em;
+    background: linear-gradient(180deg, #ff0000 0 14%, #ffff00 14% 28%, #00ff00 28% 42%, #00ffff 42% 56%, #0000ff 56% 70%, #ff00ff 70% 84%, #ffffff 84%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    -webkit-text-stroke: 1px var(--border);
+  }
+  .tagline { margin: 8px 0 0; color: var(--muted); font-size: 18px; }
+
+  nav.toc { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 32px; }
+  nav.toc a {
+    text-decoration: none; color: var(--text);
+    border: 1px solid var(--border); background: var(--surface);
+    padding: 6px 12px; border-radius: 999px; font-size: 14px;
+  }
+  nav.toc a:hover, nav.toc a:focus-visible { border-color: var(--green); color: var(--green); }
+
+  section { margin: 0 0 40px; }
+  h2 {
+    font-family: VT323, ui-monospace, monospace; font-weight: 400;
+    font-size: 34px; letter-spacing: .04em; margin: 0 0 12px;
+    color: var(--green);
+  }
+  h3 { font-size: 17px; margin: 20px 0 6px; }
+  p { margin: 0 0 12px; }
+
+  .shots { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 0 0 32px; }
+  .shots figure { margin: 0; background: var(--screen); border-radius: 12px; overflow: hidden; border: 1px solid var(--border); }
+  @media (max-width: 600px) { .shots { grid-template-columns: 1fr; } header.hero { flex-direction: column; align-items: flex-start; } }
+
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 14px; padding: 20px 22px;
+  }
+  table { width: 100%; border-collapse: collapse; font-size: 15px; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; width: 34%; }
+  tr:last-child th, tr:last-child td { border-bottom: 0; }
+  .table-scroll { overflow-x: auto; }
+
+  details {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 0 18px; margin: 0 0 10px;
+  }
+  details[open] { padding-bottom: 12px; }
+  summary {
+    cursor: pointer; font-weight: 600; padding: 14px 0; list-style: none;
+    display: flex; justify-content: space-between; gap: 12px;
+  }
+  summary::-webkit-details-marker { display: none; }
+  summary::after { content: "+"; font-family: VT323, monospace; font-size: 24px; line-height: 1; color: var(--green); }
+  details[open] summary::after { content: "\2212"; }
+
+  .contact { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+  .button {
+    display: inline-block; background: var(--accent); color: var(--accent-ink);
+    font-weight: 700; text-decoration: none; padding: 10px 18px; border-radius: 10px;
+  }
+  code { background: var(--code-bg); padding: 1px 6px; border-radius: 6px; font-size: .92em; }
+  ul { margin: 0 0 12px; padding-left: 22px; }
+  li { margin: 4px 0; }
+
+  footer { color: var(--muted); font-size: 14px; border-top: 1px solid var(--border); padding: 20px 0 40px; margin-top: 16px; }
+  .theme-toggle {
+    float: right; background: none; border: 1px solid var(--border); color: var(--muted);
+    border-radius: 8px; padding: 4px 10px; cursor: pointer; font: inherit; font-size: 13px;
+  }
+</style>
+</head>
+<body>
+  <div class="bar">SCORE 000000&nbsp;&nbsp;HI 005000&nbsp;&nbsp;LIVES 5</div>
+
+  <div class="wrap">
+    <header class="hero">
+      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAIAAADdvvtQAAADPUlEQVR42u3dW1asMBAF0Kq7HKXzn0fur9pKA3lAyN6fLpsGPCZFCCECAAAAAACIiM/P4iTAXqX4hwFABwFoyQAAeIg8UzlWb6Vsfrw02cuDh9D8VJbhf5gy4G//4p//IQSI2wbIOAdVAcp0jtjwEUtW0RmHW96sO8ajH3+7A/V72OAY1UAoohEgBAhF9LgRzOw/QnrBCH3TLeTt91ALhAAhQAgQAgTjbmU8YUbQ8GM8PFsnh/8VzpxnLRC6MA/lCNAl0mQVAWLCItq9jDNbyINXEif2sIy/l6EFQoAQIAQIAYKDo2UfbmRccoyvPyvfP5HvvvC3PcyDe1j2HOP2aJkWKCxEHMMXVyhts5+b/4sntt+iBep7jM1/v1EL5GYqimji6U9lZOVt7dye71LeN7bd75sOqaK3+vGXU/rzEG4xHeiqFshtcF0YCBACBAAAMdvU33srzrGrMAQIAYLJA+RJZEW0IloLRKw4sV6A6DL9RoDQhSFAuAqb4ZorW1y1Zf/d0AKhCwMBQoAQIFyFvR3qvsOzgsW176QtkCdNdWEgQAgQ8fzXPa19UWFepBYIAUKAECAECAyqn17psnQ4hcVjPSBA4YUHujBdmBYIAYJwL6zTq8iKFggECAFivkW9BIioeU1Wrl5EG1zThSFACBACBAIEAEDUrlrj/RyKaAQIAUKAQIAQIAQIAYJWAVrteV4AwuIK0e5twg1Xy59rs4poBAgBAgFCgBAgBCiWWV8CAYqa9SXC6q0GEg0kaoEQIAQIwjK/tQXK0wsXLRAChABBPqdY+T56WLWprx/f8ztj9lYLhC4MBIgwDrS/WDmxqQFf8ZQ5AlogBAgBQg0UNx0Tqpys0+krtEAgQAgQaqC4amTlr49X3v8yDnTfUpcVA2QinwDBSuNAOzvNmqbxRL9sHAgECAEizInuetNqo7jpUYjs/LoTe6sFQhcGAkQYB2pS0PxVcAx4gMs4EMwUIC8Bchl/70eb592sFggt0PyLbA5YXMEimyz0aIoALdmLpAChBnrqvdin3w3VAiFACBACBAKEAD2S94W5jHcZrwVCgBAgNYQaSA2kBlo0QK0mQlizRg2EACFAAAAwl//MnfXX0ixmjgAAAABJRU5ErkJggg==" width="112" height="112" alt="The Ultra app icon">
+      <div>
+        <h1>THE ULTRA</h1>
+        <p class="tagline">Help and support for the classic Oric arcade shooter on iPhone, iPad and Android.</p>
+      </div>
+    </header>
+
+    <nav class="toc" aria-label="Contents">
+      <a href="#how-to-play">How to play</a>
+      <a href="#controls">Controls</a>
+      <a href="#scoring">Scoring</a>
+      <a href="#options">Options</a>
+      <a href="#faq">FAQ</a>
+      <a href="#privacy">Privacy</a>
+      <a href="#contact">Contact</a>
+    </nav>
+
+    <div class="shots">
+      <figure><img src="data:image/png;base64,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" width="960" height="540" alt="Sheet 1: rows of green alien ships marching across the screen above the player's cyan ship"></figure>
+      <figure><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAA8AAAAIcCAIAAAC2P1AsAAAceUlEQVR42u3dTZLkNpIGUPexstIN1BfTMXUx6QaqDXqh6bKssEgmAALg33urqU4mg0ESKZ+PgDO/f/89oN2PH387CQBclxKIbv/nFAAAgAIaAAAU0AAAoIAGAAAFNAAAKKABAEAB7RQAAIACGgAAFNAAAKCABgAABTQAACigAQBAAe0UAABAvW9OAYxVoiz7rIysP4bPNt751d7u9gwn4Zx3wuFXYfHpOvxOmHQAk67jDW57CAk0AACggAYAAAU0AAAooAEAICwiXOmff/6q3/i33/7jhgAAICTQAAAQEmg4p6b2UqW8azSWub952NsjW7fbd1sO+F5xsY6GJ7wKi7uf1Q+HlWNh/27rj/btlvuPYdJugZBAAwCAAhoAAMIUjjH++OOvA3+9xp9/WqcIABASaAAAUEADAAAKaAAAUEADAMAi+f377+FNhBHhTYSNfvz420mI63cKjts2IHZxL3YVHjUW9h/DpN0+zb1LIEICDQAACmgAAFBAAwCAAhoAAIj7vYkwrAsEACAk0AAAEBJoIJY22SqTvkKuO4BMF1cfu1OMhYZbUR87CAk0AAAooAEAAAU0AAAooAEAQAENAAAKaAAACG3sgJjdAm7Wbic1UFt5AC5uy27T6Wq6Fec0hsvdo8lggpBAAwCAAhoAAMIUDt7455+/6jf+7bf/OGMAACGBBgAABTQAAKCABgCAMAca7qMsbDi3crdF6y1X4WKn67OPKu/2kLm3+2Pu+2qlaHAHCugx/vjjr5Mfz59/WlYIABCmcAAAgAIaAABQQAMAgAIaAAAWye/ff3cWwpsI2/348bf7YYC9C/zPuttJB+Di3vgqnHYs7NxDWduFI3XhaKAEIiTQAAAQ2tjBzeVNd5stDXFP+m33H1dOOQn1EeO1rsJpx0LmlPbSN73rISTQAACAAhoAAMIUjkXuvS4QAICQQAMAgAIaAAAU0AAAEOZAA6GPHYecmXRm7jsWDDEICTQAACigAQBAAQ0AAApoAABAAQ0AAApoAABQQAMAQOgDfRn//PNX/ca//fYfZwwAICTQAACAAhoAABTQAACggAYAgLCIcKU//vjr5J/y558WIAIAhAQaAAAU0AAAgAIaAADCHGjgMKV8+qPMhl95u3HNlj+32djDzx9tHO2X+6//gn2n62WHNYf681fqdzvwEr892vrParq4Nd/u5VrX3yQAjfL799+dBW8i7PDjx99OAgpoBbQCmutSAhESaODQ/2e8omppqnTra6Pu46w5nkkl1/b/a/HZSRi72/oad/huOy6uwhcIc6ABAEABDQAAYQoHQFxoNrZn/W6DMOsDUEDPZ10gAAAKaCAO7sWxOAL8uFRx4HLDGV+tpq/FqKYl98hi60/C8IWnAGEONAAAhAQaiPO1sTvwSCqbKO/s0Le/g9vYjSeFrwNP5sobbPidABASaAAAUEADAECYwgEQA5cAPuTrj2ro1vRK9pOfCoCQQAMAQEiggXheKlzTl21lY7LtzHLlosnuIzmkodvG0b4cQNPFrd8tQEigAQBAAQ0AAGEKBxA6QMecxsbd29TMcFg5MWDsd5/9Xep3O+k2GHUSTPMAQgINAAAKaAAAUEADAIACGgAAFNAAAIACGgAAFNAAAKCABgAABTQAACigAQBAAQ0AACigAQBAAQ0AAApoAABQQAMAgAIaAAAU0AAAgAIaAABG+uYUANxE+fWf6YwAhAQaAABCAk08NB6rke07z+qflooPLe2HVyq2rDnabDlvOfRoRZhf3m6lRERmfrnN6xnNvM/IXTBSavaf7bd0af/jY6RMHk01I+U+Y4qQQAMAgAIaAAAIUziIY5/5Zu9+csevlPbdvv1p/VyLbJ9hEkNns+w/WlqeNX+2zcYz6Ms8dD58pDQNnDJopOzfLS2jqWakbAyc7f1ASKABACAk0NxT93q1UUltaV8ztP6EcLn7+tc8LEan14OX5JbJt6K7mjj7EyEICTQAACigAQAgTOGAaO6ruv3PuMuyyO7e2Pub5mZ1Q1yP5qetlBr20DnP+ibCsXdUTr6ljZSzToiqabI+eExBSKABACAk0MSt30Q4dvFfjn4z4qg1jsPf0Pbl0eaOAxCwTX5bYdz1QdPKkZI7bukcNFSNlMlt7HSsIyTQAAAQEmiIIRnqylgh25Pp7reQlOO+oJAsDp7iefNhnkNHCjx5TBESaAAAUEADAECYwgFxhjcRXutVZ29X6eVxDe8ymqedFG+Y2/vms7dLmvY05zr7isDuSVndI6Xs6Iw5dr6WkXJoG7uNjnXmdRASaAAACAk0xIK0pqlZW/3GHT3gcu3RLtgtXVnXAcFYHrfbQ0ZKzBkpYuazDithMyGBBgAABTQAACigAQAABTQAACigAQBAAQ0AAApoAABQQAMAgAIaAABQQAMAgAIaAAAU0AAAoIAGAAAFNAAAKKABAAAFNAAAKKABAEABDQAAp/HNKeAw5dd/pjMC1QPHeAEICTQAACigAQAgTOGAGDJnI4bO6Phs5znoV0rFlqXi13PmbkvjGaD1Livvb5rMrNz47ZZtcvOOWj9yu4+n6XYtXx3A/pGyvdsYfbS0j5RZYwpCAg0AACGBJu4YOedm8Fx6M5v6+DZ3JMcbv1iTdXXsNnpPQhF9DQvJPsu6Pv70Z0i2EaENy6FnrymctPOOqHjSF8x9W5bjHgvcKHiuGSkbA2d7PxASaAAAUEADAECYwgHx9WyNMmitz9lWXL19tr7/i3R/hdQ/eMRV3f10+LMFiFMGl4kExHMX9UJIoAEAICTQxKOC52P3cL+TKUiOa6yCervNxTKz7O0ROem27+44ub+VXs2W2dWh7/FPdTqa071dtgshgQYAgJBAQ3S/3CTO3ZJvZT6X5z5RoatdDO5YN6rJ2vABu/NhSBn0BXNHLJ1zVlPkwp6Az2hjp2MdIYEGAAAFNAAAhCkcEOteb1bO/Sq1PNmEk/qJHN6OtnbV4MDOdzdfeJqXmsRlLe8tuklCSKABACAk0MRzGrFNWnhXehcslnM35+o+CSKbGP/Kho3GW3uac614XpHj1vm1Rsg5eqFhzlwcnO1rCoumnLPa2G10rBNLExJoAABQQAMAQJjCATF48dCkVrU7f6Wp22u272fnMaRnxOddvXS6J8s581dy0G7zMbulfaSYrUFIoAEAQAENAAAKaAAAQAENAAAKaAAAUEADAIACGgAAFNAAAKCABgAAFNAAAKCABgAABTQAACigAQBAAQ0AAApoAABAAQ0AAApoAABQQAMAwGl8cwqYqAzaTzqVsGMA5od/5q8/NbgAQgINAAAhgSauGX3lnCCtI/bOloA8qz/67dcsLSF6GZq4l/Y91BxA00ko93ykUMrXXywzv/yVl22u/RApd99RM0ZK9wHkjidp+7/gk/9zUT1S7jCmCAk0AAAooAEAgDCFg3jaeqloWU01av5JaTyAppkhk0xaUna7Z6rbD5Q//vTt//jy010PnddPD6gZKR239PCRUj8AO+Zr5Zw5VGZu1I2UjYGzvR8ICTQAAIQEmtDGLhbmrEcti0xrQ28YnjUlXjXLEPvvqPLIy5BxgacxHLq0F0ICDQAACmgAAAhTOCDu+bB4UkfqK56EfNh3f7emsGb10ss2l3zoXObMoLjWTVJztPmU+3/swtyO7s4f51CZyEFIoAEAICTQxMNT27jjYsTWl5OV03+17jD+wa9b2+6xNaBj3UkGRVPDx3LTRXu5e2NrE3e0sdOxjpBAAwBASKAhrvualZiTwu5MquIigVzRt67h3Sv3f0lNxy2dvQFtmfOkS7h5qfcZQUigAQBAAQ0AAGEKB8SKGQ71T1SzvdvU8OZceZopDaX3DXZl6Isbb7TEcLth1scny3uac8Wj2tjVdIocNa6z4qvl7lvaytppbew2BqB5HYQEGgAAQgJNaGN3zg/N3dvkwt1OOuHDjzatYYqzBGO5+0qNGk31H50nGNdTP5odI0XYTEigAQBAAQ0AAApoAABAAQ0AAApoAABQQAMAgAIaAAAU0AAAoIAGAAAU0AAAoIAGAAAFNAAAKKABAEABDQAACmgAAEABDQAACmgAAFBAAwCAAhoAAK7om1MAcAHl13/m0fsBCAk0AAAQEmjiqflcbMZspT17K9W7rTmAPb/CeW668v/XLzM3fvrLVc3e6/rZzZaN93BOG1YzRkppHx0dx8w5xtGXI2XwmIKQQAMAQEigIXYHddEb19X84ttIr+YAijws7peZ1cfSAzKzbMmVy76bLVt2W3+HNw3VmodIxZi62wOcnz/aGDjb+4GQQAMAgAIaAADCFA6IzpVJHsFxnYfOGxM5mmZ9xP65HE9bOZfmbDBtTEFIoAEAICTQEPv6zR1+AHmao6Ul6+pYpbQntI5Rre4mPTLKkw3VNKau5GWBYFNzuo/jUQ5NSKABAEABDQAAYQoHxOBWzXHKPtCzDyAndO0lVi9aejvBY1jL51EvDowlfaAntbK+0F8AJvSB1vKZkEADAEBIoAHiAQueojoPWxqSXTqP6+hJ5ymNYQghgQYAgJBAQ5y7jV3Nuydy0G6z/aOJxzXnutibj2ru//qoODcnK5d9I9qYuvhI2ehYJ5YmJNAAAKCABgCAMIUD4sKt8XLO/vMZS76oe3Z8hyfL60dKrh3XXGppoNkahAQaAAAU0AAAoIAGAAAU0AAAoIAGAAAFNAAAKKABAEABDQAACmgAAEABDQAACmgAAFBAAwCAAhoAABTQAACggAYAABTQAACggAYAAAU0AAAooAEAQAENAAAKaAAA4H++OQVMUX79Zy7/xKg4gFKxcanYQ44+2refWHq32fMr6Vb+33kqX5/czPzyV162mTUKcvngGjUA99yfpeKz6vfv5j90cL0dKQeMKQgJNAAAhASauE4gvSYmqMmfto9nwdFme3CYLYeXJ7sod1GTdf0MyTYitMtkZh03Sc2zmo6ouPsRUOkdcawKnmtGysbA2d4PhAQaAABCAk08cGJ0fj5PWjLEBWdCNyXTE+clZ8v0Yg++eMDKBAgJNAAAKKABACBM4YBofvpcljzaPmebsDVnOKu7j3nq3ThJo36F07CHzrnk/szqho+zB2AZehLMdTnTmOpoTvdxxJnIQUigAQAgJNAQNbFWDsqh88rJ8dRefk5XHLDC6Q6ttZoaPubQ1wl1LDLe3/DR6sPztbHTsY6QQAMAgAIaAADCFA6IiQ+C0/Id4sbzMQ54ypzXnxlS6n6lfnqG+RgPexUohAQaAABCAk3InuPEHdxeNv4s8SpHf69Ssbqro4GX5wCb0VfNmwj3NOeKS/RDPMN9kl05dOViZff/+drYbQxAsTQhgQYAgJBAEyLnc35ixuAJ3FMPPid/I0ZPwbxzA7t5917TQMs5u+Wsw0rYTEigAQBAAQ0AAApoAABAAQ0AAApoAABQQAMAgAIaAAAU0AAAoIAGAAAU0AAAoIAGAAAFNAAAKKABAEABDQAACmgAAEABDQAACmgAAFBAAwCAAhoAAK7om1PAOqVl43S+AICQQAMAQEigIdoi5/z8p/nud7Pls7Lip2Vzt29/WirC8tJ4AE3pe2nJ6Ws2rj/appPwkFu7/HIuMvPLbTa27BlNGSv2U6ofFp3hlo7eI+FMo2ndmIKQQAMAgAIaAADCFA7isZM3tp+zZe/0jO0JGGXQF5n0kDCrv0LTzJBsn5qy8SC+ePz9+gR546nx9jb//nTAQ+fhMzFGTXs48JYu7tL7jKaXkbIxcGpGJYQEGgAAQgLN3byNM7djsDI0AGtatOdKvaR3TteE5Pjt+qcBMXB5cGtIgaNRCSGBBgCAkEAT0s2Y25ZrZUC7v4vW/snilzgJ8azEq35K9LDMrKYzY1P3xu5+lCtv6e2dp7v0Uv99+HV+c1Nzuo9PhOTQhAQaAAAU0AAAEKZwQEzpfNf9JsKY/MS2vjFc7ngp44EPmnPoSYibP3SuWWI4rGPd9r1UKm6zsq8p4f5VvJPu0o6JVeZyXLONnY51hAQaAABCAg0xI117SMrgTRBPiqun9Ig8W+s3tzQXGlMQEmgAAFBAAwBAmMJB6BIdB03eyOrutuWIpYqlt7vtpIbNxdvgvug4+/HJ8p7utsOac5/nSk29pSe9zZTz9YHeGIDmdRASaAAACAk0xIJ4LNt/mnMaeEVLrjb2aEd9tZTeDVjDtCgYy3Ps/OS3NLcYVsJmQgINAAAKaAAAUEADAAAKaAAAUEADAIACGgAAFNAAAKCABgAABTQAAKCABgAABTQAACigAQBAAQ0AAApoAABQQAMAAApoAABQQAMAgAIaAABO45tTwBRlzm7TmYX2cWfgAIQEGgAAFNAAABCmcPBQWfF8OVt+GvueYmfv8+7S8jX3f/TbXyztc1qKaTCDlfL1NcvML3/lZZvBkzey7p9j52Jl+y1dP14OGYDZ+4dl1G4fNlrrR8rSMQUhgQYAgJBAQ7wLcrL6p035XFbEfhuhVO5OmGq+VxEzz7Kdcn0Mxn7+3xsR2twcOsat5W26mevvvdI4VBcPwPr8fs/RlqcP1aaRsjFwtvcDIYEGAAAFNAAAhCkcEBdY1Ljyo02uiMc9g+5YhogByNilvRASaAAACAk0xCVeyVbmBNtlaBetnHy0tK8FfEmp75+ZHT5SrrLbfPpQfVkg2LFs9yljipBAAwBASKAhTj/puZx1JmVHG7uxTfeIuZOeH9daK4e+pWXNABw+NMa2p9TGTsc6QgINAAAKaAAACFM4gNgzjyJmPh02H+PiLy+c26ztEovSsn1ex6QBqNWdMQUhgQYAgJBAE7foIle/TWt3p2xfmVSif+HORgxcWsK/Ep3rkN5mZuWsb5OJJ4ZkHc25bj721zyHKaPX6U7qN1eePlSbRspGxzqxNCGBBgAABTQAAIQpHBAnnS2QQ7dsarecc85PTjgA5q9hOuDJch63/0Nu6UkDMOf8uTClavdIMVuDkEADAIACGgAAFNAAAIACGgAAFNAAAKCABgAABTQAACigAQBAAQ0AACigAQBAAQ0AAApoAABQQAMAgAIaAAAU0AAAgAIaAAAU0AAAoIAGAIDT+OYUcIDy+Y/S2YF9g2ibIQYQEmgAAAgJNMTQZC5b0rvs2rLvADb2kJ/8c2M/pT2ALIO2id4zfK2bq7z/YplZufHbLa+dc2fvLT08Ke8YKTnnJIz9c3H7v9nVI+UOY4qQQAMAgAIaAAAIUziI58zcyOqfZsuD4LFzLWbLoc+7tye3ZPVur/+U+bOHxR9/+vMp88Yz6F0PnUv1jKO3l6bpVpx6ca9yk2T7QL7Wn4ujZ27UjJSNgbO9HwgJNAAAhAQauKS8eeQcqxYgTlznV5x1jCkICTQAACigAQAgTOGAaOyZmqfpcbu+XWvNmqEyuhn2yot7/RVRLwsE6zvRvqxwmvvQOU8whaNc4S49Qzd6/x34dYFgU3fnt8t2ISTQAAAQEmiIUwVgTcvg8uj2Urk7RF+5zux2zbnq29iN7FhXfyuWivthzXJP79trOuHFEsCGho861hESaAAACAk0xKneehB1MU99uny/3m3Zm4oVMztrp3jGgkcuYs7zL/bIoQPQmIKQQAMAgAIaAADCFA6IqZMHrvJqvbeLhOo7uH32WaNmhpQ5p71U7Kdc54rPaWO3pzlX/+1aLjjiyuij7WihuOB29c7OEW3sNgageR2EBBoAAEICDXF4np29G2f7h+aOw27dYY776AW7fdgapkXBWJ5jlA0cgAtOSC75O9N9EtLSQIsICQk0AAAooAEAQAENAAAooAEAQAENAAAKaAAAUEADAIACGgAAFNAAAIACGgAAFNAAAKCABgAABTQAACigAQBAAQ0AACigAQBAAQ0AAApoAABQQAMAgAIaAAAU0AAAgAIaAAAU0AAAoIAGAAAFNAAAKKABAOCRvjkF0KC8+x/zk22yd4eV+2/dpv6oRp2EpjOQSy5cx0XJoSfqBhd36kkoLV+t7Nty3sXNCQPn5R4uFZ+Vu48ZCAk0AACEBBpiYfacczLU/Unt28MbfrRTT8LKhwYrs3AXt+kkZN1PW5Pa7PrQ7u9V9kXFK/98ASGBBgCAkEDDycl1zn91tnNo+VycYPHAzgcI0fW04eSnyz0JIYEGAAAFNAAAhCkcQFziAfchu33UVdh/xh5+cXPQ0slSvZ+m6TrllPdMjp5clP4gQEigAQAgJNAQliHG2PVPOWdBUnnYVSjzO7idIaQ8ycUt4zrfHdijcEFyPOpoLViEkEADAIACGgAAwhQOiPstPlvzDDQbn7xPWpD0kHkdcalG1ye8uK0HlnOmx+Tde5kDIYEGAICQQEPcNATK9vVY2ZLw5ZyvkMc1hlt5Ekp8HYjmzJZkHSsCOw4gz7ogrH7gNF2FSbud0cYu53QebNpt8SJVCAk0AAAooAEAIEzhgHhew+ZDVkFl9cY55+vnWVd3HXgkufwGW3Nxz3MVXNwZf5SAkEADAIACGgAAFNAAAKCABgAABTQAACigAQAABTQAACigAQBAAQ0AAApoAABQQAMAgAIaAABQQAMAgAIaAAAU0AAAoIAGAAAFNAAAKKABAAAFNAAAKKABAOAo35wCWKGUqs0yv/6Vt9t8/B/3HEPNfvbv9u2vdHx0zUn496cdB9C020nn9qhbseZ0Vd6uoy7uUXfXvGPY2G39lme7uyAk0AAAgAIaAADCFA44u6bpAS8/ejsJYdQxrNxtx1yLaH/U/u8ePnvq3X14HafiBrfi9kV5+9OxF3fU0S6+uB9vwu1frD9akzQgJNAAABASaIA4OlvtWN4HACGBBgCAkEADxNWaFU7t4HbCqbHDu8jd+3vV77ammSAQEmgAAFBAAwBAmMIBEOds03bdjz7Po/mmhZh3nVEw6Xu9dF2s6WsJhAQaAABCAg0Qd0kc376f5VFx4PaLVJh0swEhgQYAAAU0AACEKRxAnHDl1vbkgY2H6ed5HLz9dsA1x/kyE6PmAN6+4LBjSoPn8ie8uAsGb9O0n42ZQu4uCAk0AACEBBqIcS2xRm0TR7TlOk+7t7c/7TiAjk+5wa1Y/9OVDxAW39jD75bWjnXSZQgJNAAAKKABAEABDQAAKKABAEABDQAACmgAAFBAAwCAAhoAABTQAACAAhoAABTQAACwxjengDnKyY4nXRIAf/whJNAAAKCABgCAMIWDZ0rPEwH88ffHn5BAAwBASKAB1it1IVHm17/ydpvMTz/05UeTdjvqJNQcbeaUC/HZR9d/XM3Rbp+97nMLEBJoAAAICTTwWE3p5qSQ8vDsc1QW25EN12TYe3Y79WgBQgINAAAKaAAACFM4IFatMCsRkR7xEmeZZALM+2vvDz4hgQYAgJBAQ9w/ey6V7wVoaSVWTvy6AWZ137vH91ozCv/9lJeVhRYaxoMe9aQHj4QEGgAAFNAAABCmcEBYRwIxrl+yFZPdZ+bnAXj14MPncpjIQUigAQAgJNAQOtbxmPWCbswQ2HNQDu0/DYQEGgAAQgINcau8ISdMGBWfjO90tnE5XqbSbl+4+t2e/CQsPtSNCFlciGeShAQaAABQQAMAQJjCQXgZFfduo9Z0U9RvvP+jR92tw0/C+hNVs/Gak0mYvAEhgQYAgJBAQ+ilDxDeouUPPiGBBgAABTQAAIQpHBBnXlMIgL/2EBJoAABQQAMAgAIaAABQQAMAQFhEyJkUpwDAH38ICTQAAIQEGobSkAjAH38ICTQAACigAQAABTQAACigAQDgYP8FuKoPnxjEZ68AAAAASUVORK5CYII=" width="960" height="540" alt="The Points per Alien page, listing all sixteen alien sheets and their scores"></figure>
+    </div>
+
+    <section id="how-to-play">
+      <h2>HOW TO PLAY</h2>
+      <p>Destroy all sixteen sheets of aliens. Each sheet has its own aliens and moves in its own way: marching rows, a swaying diamond, conga lines, loops, V shapes and rings. Aliens step one chunky character cell at a time, just like the 1983 Oric original.</p>
+      <p>Dodge the bombs, and don't let an alien fly into your ship. Clear a sheet and you make a hyperspace jump to the next one.</p>
+      <p><strong>Watch the heat gauge</strong> in the red status bar. Your machine gun heats up with every shot. If it overheats it locks until it has cooled down, and the heat carries on into the next sheet.</p>
+    </section>
+
+    <section id="controls">
+      <h2>CONTROLS</h2>
+      <div class="card table-scroll">
+        <table>
+          <tr><th scope="row">Move</th><td>Tilt the device like a steering wheel: lower the right edge to go right and the left edge to go left. The more you tilt, the faster you move.</td></tr>
+          <tr><th scope="row">Fire</th><td>Tap anywhere on the screen. Hold your finger down for rapid fire.</td></tr>
+          <tr><th scope="row">Pause</th><td>Tap the pause icon in the top-left corner (or press Back on Android). The pause menu has Resume, Options and Quit.</td></tr>
+          <tr><th scope="row">Title screens</th><td>Swipe left or right, or tap the arrows in the bottom corners, to page through How to Play, Points per Alien and the Hall of Fame. Tap anywhere else to start.</td></tr>
+          <tr><th scope="row">Keyboard or game pad</th><td>Arrow keys or D-pad to move, Space or the A button to fire, P to pause.</td></tr>
+        </table>
+      </div>
+    </section>
+
+    <section id="scoring">
+      <h2>SCORING</h2>
+      <ul>
+        <li>Each alien is worth 10 points on sheet 1, 20 on sheet 2 and so on, up to 80 points from sheet 8 onwards.</li>
+        <li>You start with 5 lives, and earn bonus lives at 2,000 and 10,000 points.</li>
+        <li>Clear all sixteen sheets for a 5,000 point bonus, then the sheets start again, faster.</li>
+        <li>Make the top ten and you can enter your name in the Hall of Fame.</li>
+      </ul>
+    </section>
+
+    <section id="options">
+      <h2>OPTIONS</h2>
+      <p>Open Options from the slider icon in the top-left corner of the title screen, or from the pause menu.</p>
+      <ul>
+        <li><strong>Tilt sensitivity</strong> goes from 1 (low) to 10 (high). Higher settings need less tilt to reach full speed. The default is 5.</li>
+        <li><strong>Invert tilt</strong> reverses the steering direction.</li>
+        <li><strong>Tilt test</strong> shows a live preview of the ship so you can find a comfortable setting.</li>
+      </ul>
+      <p>Your options are saved and kept between games.</p>
+    </section>
+
+    <section id="faq">
+      <h2>FAQ</h2>
+
+      <details>
+        <summary>The ship moves the wrong way when I tilt.</summary>
+        <p>Turn on <strong>Invert tilt</strong> in Options. It reverses the steering.</p>
+      </details>
+
+      <details>
+        <summary>The ship drifts, or it's too twitchy.</summary>
+        <p>Change <strong>Tilt sensitivity</strong> in Options. Lower numbers need a bigger tilt before the ship moves quickly. Use the tilt test on the Options screen to try each setting. It also helps to hold the device steady in landscape before you start a sheet.</p>
+      </details>
+
+      <details>
+        <summary>My gun stopped firing.</summary>
+        <p>It has overheated. The gauge in the status bar flashes and "OVERHEATED" appears. Wait a few seconds for it to cool, then fire in shorter bursts. Remember the heat carries over into the next sheet.</p>
+      </details>
+
+      <details>
+        <summary>Where are my high scores kept? Can I reset them?</summary>
+        <p>The Hall of Fame is saved on your device only, and it's kept between games. To clear it, delete and reinstall the app. That also resets your options.</p>
+      </details>
+
+      <details>
+        <summary>Can I play in portrait?</summary>
+        <p>No. Like the original, The Ultra plays in landscape only. Turn your device either way round and the game follows.</p>
+      </details>
+
+      <details>
+        <summary>My device has no motion sensor.</summary>
+        <p>If the game can't find a motion sensor, left and right buttons appear at the side of the screen instead. You can also use a keyboard or game pad.</p>
+      </details>
+
+      <details>
+        <summary>Does the game need an internet connection?</summary>
+        <p>No. It works completely offline and never connects to the internet.</p>
+      </details>
+
+      <details>
+        <summary>What is the original game?</summary>
+        <p><em>The Ultra</em> was published by PSS in 1983 for the Oric-1 and Oric Atmos home computers. This version recreates its sixteen alien sheets, their movement patterns and its rules for touch screens.</p>
+      </details>
+    </section>
+
+    <section id="privacy">
+      <h2>PRIVACY</h2>
+      <div class="card">
+        <p><strong>The Ultra doesn't collect any personal information.</strong> It has no accounts, adverts, analytics or tracking, and it doesn't connect to the internet.</p>
+        <p>The game saves your Hall of Fame (names, scores and the sheet reached) and your options in its private storage on your device. They never leave the device, and they're deleted when you uninstall the app.</p>
+        <p>The motion sensors are read only while you play, to steer the ship. Nothing is stored or sent anywhere.</p>
+        <p style="margin:0">This applies to everyone, including children.</p>
+      </div>
+    </section>
+
+    <section id="contact">
+      <h2>CONTACT</h2>
+      <p>Found a bug, or need help? Get in touch. Please include your device model, its iOS or Android version, and what happened.</p>
+      <div class="contact">
+        <a class="button" href="mailto:paul@all-the-johnsons.co.uk?subject=The%20Ultra%20support">Email support</a>
+        <span><code>paul@all-the-johnsons.co.uk</code></span>
+      </div>
+    </section>
+
+    <footer>
+      <button class="theme-toggle" type="button" id="theme">Toggle theme</button>
+      The Ultra &middot; By PFJ &middot; Based on the PSS Oric game (1983)<br>
+      &copy; 2026 Paul F. Johnson
+    </footer>
+  </div>
+
+<script>
+  (function () {
+    var root = document.documentElement, key = 'ultra-support-theme';
+    try { var saved = localStorage.getItem(key); if (saved) root.setAttribute('data-theme', saved); } catch (e) {}
+    document.getElementById('theme').addEventListener('click', function () {
+      var dark = root.getAttribute('data-theme')
+        ? root.getAttribute('data-theme') === 'dark'
+        : window.matchMedia('(prefers-color-scheme: dark)').matches;
+      var next = dark ? 'light' : 'dark';
+      root.setAttribute('data-theme', next);
+      try { localStorage.setItem(key, next); } catch (e) {}
+    });
+  })();
+</script>
+</body>
+</html>

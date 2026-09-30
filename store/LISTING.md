@@ -16,7 +16,7 @@ Everything you need to paste into Google Play Console and App Store Connect. The
 | Price | Free (or set your own) |
 | Contains ads | No |
 | In-app purchases | No |
-| Support email | *(your support email)* |
+| Support email | paul@all-the-johnsons.co.uk |
 | Privacy policy URL | *(host `store/PRIVACY.md` publicly and paste the URL here)* |
 | Website (optional) | *(your site)* |
 | Supported devices | Android phones and tablets, iPhone, iPad |

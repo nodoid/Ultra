@@ -31,4 +31,4 @@ If this policy changes, the new version will be posted here with a new date.
 
 ## Contact
 
-Questions about this policy: *(your support email)*
+Questions about this policy: paul@all-the-johnsons.co.uk
