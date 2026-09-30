@@ -8,10 +8,10 @@ Written by **Paul F. Johnson**.
 
 ## The game
 
-- **16 waves of aliens**, each with its own animated graphics and attack pattern: Marchers, Wavers, Swoopers, Bouncers, Orbiters, Zigzaggers, Loopers, Kamikazes, Centipedes, Spirallers, Raindrops, Pendulums, Phantoms, Crossfire, Hunters and the Ultra. After wave 16 the cycle repeats, faster and for more points.
-- **Gun overheating.** The machine gun heats up with every shot. If it reaches the limit it locks until it has cooled. The temperature carries over from one wave to the next, so you start each wave with the gun as hot as you left it.
-- Aliens score 10 points on wave 1, rising by 5 per wave to 85 for the Ultra on wave 16. Diving aliens score double. You get an extra life every 10,000 points.
-- Oric-style presentation: a 240x224 screen with the in-game sprites drawn at 1.5x size (the screen is rendered at 2x internally so every pixel stays even), the eight Oric colours, a 6x8 character-cell font, and AY-style square-wave and noise sound effects synthesised at runtime.
+- **The original 16 sheets.** The alien graphics, animation frames, movement paths and formations come from the original tape (see [Original data](#original-data)). Aliens step one Oric text cell at a time along their sheet's path and wrap around the screen edges, just as on the Oric. After sheet 16 you get the original "WELL DONE!" message and a 5,000 point bonus, then the sheets repeat, faster.
+- **Gun overheating.** The machine gun heats up with every shot. If it reaches the limit it locks until it has cooled. The temperature carries over from one sheet to the next, so you start each sheet with the gun as hot as you left it.
+- **Original rules.** You have 5 lives, with bonus lives at 2,000 and 10,000 points. Aliens score 10 points on sheet 1, 20 on sheet 2 and so on; the rate stops rising after sheet 8.
+- **Oric-style presentation.** A 240x224 screen laid out like the Oric's 40x28 text screen, with a red status bar and "PREPARE FOR HYPERSPACE JUMP" between sheets. In-game sprites are drawn at 1.5x (the screen is rendered at 2x internally so every pixel stays even). It uses the eight Oric colours, a 6x8 character-cell font, and AY-style square-wave and noise sound effects synthesised at runtime.
 
 ### High scores
 
@@ -48,7 +48,20 @@ Tilt uses the gyroscope-fused gravity vector: CoreMotion device motion on iOS an
 | `Ultra.Core` | All game code (net10.0, MonoGame 3.8.5). It needs no content pipeline because graphics, font and sound are generated in code. |
 | `Ultra.Android` | Android host activity: fixed `SensorLandscape`, immersive full screen, adaptive icon, splash theme, tilt sensor |
 | `Ultra.iOS` | iOS host: landscape only, app icon set, `LaunchScreen.storyboard` splash, CoreMotion tilt sensor |
-| `tools/generate_art.py` | Regenerates every icon and splash image from the game's own sprite and font data (requires Pillow) |
+| `tools/generate_art.py` | Regenerates every icon, splash image and store graphic from the game's own sprite and font data (requires Pillow) |
+| `tools/extract_original.py` | Regenerates `Ultra.Core/OriginalData.cs` from a tape image of the original game |
+| `tools/check_listing.py` | Checks the store listing text against each store's character limits |
+| `store/` | Store screenshots, icons, feature graphic, listing text (`LISTING.md`) and privacy policy (`PRIVACY.md`) |
+
+## Original data
+
+`Ultra.Core/OriginalData.cs` holds the aliens, paths and formations of the 16 sheets. `tools/extract_original.py` generates it from a tape image of the original (the Oric-1/Atmos `.tap`), and the script's header describes the data format found by disassembling the game. The tape image itself isn't included in this repository.
+
+Because the remake draws aliens at 1.5x, formations are re-spaced so aliens don't overlap. Aliens that share a track are spread further apart along it, and fixed formations are scaled up about their centre. Some sheets have fewer aliens than the original as a result. `OriginalData.OriginalCounts` records the original numbers.
+
+## Store submission
+
+`store/LISTING.md` has the text for every Google Play and App Store field, with answers for the content-rating, data-safety and privacy questionnaires. It also covers how to build the upload files. Read its note about rights to the original game before publishing.
 
 ## Building
 

@@ -22,8 +22,7 @@ MAGENTA = (255, 0, 255)
 CYAN = (0, 255, 255)
 WHITE = (255, 255, 255)
 RAINBOW = [RED, YELLOW, GREEN, CYAN, BLUE, MAGENTA, WHITE]
-WAVE_COLOURS = [GREEN, MAGENTA, YELLOW, CYAN, RED, WHITE, MAGENTA, YELLOW,
-                GREEN, CYAN, WHITE, RED, MAGENTA, CYAN, YELLOW, RED]
+WAVE_COLOURS = [GREEN] * 16          # all the original aliens are green
 
 
 def load_font():
@@ -36,14 +35,13 @@ def load_font():
 
 
 def load_sprites():
-    src = open(os.path.join(ROOT, "Ultra.Core", "SpriteArt.cs")).read()
-    aliens_block = src[src.index("string[][] Aliens"):src.index("PlayerRows")]
-    aliens = []
-    for m in re.finditer(r"new\[\] \{(.*?)\}", aliens_block, re.S):
-        rows = re.findall(r'"([.X]+)"', m.group(1))
-        aliens.append(rows[:8])
-    player_block = src[src.index("PlayerRows"):src.index("Boom1")]
-    player = re.findall(r'"([.X]+)"', player_block)
+    """Alien frames and the player's ship from the original game's data (OriginalData.cs)."""
+    src = open(os.path.join(ROOT, "Ultra.Core", "OriginalData.cs")).read()
+    frames_block = src[src.index("AlienFrames ="):src.index("public static readonly byte[][] Paths")]
+    frames = [re.findall(r'"([.X]+)"', m.group(1)) for m in re.finditer(r"new\[\] \{ (.*?) \}", frames_block)]
+    aliens = [frames[i:i + 3] for i in range(0, len(frames), 3)]      # [sheet][frame] -> rows
+    ship_block = src[src.index("PlayerShip ="):src.index("public static readonly string[] Shot")]
+    player = re.findall(r'"([.X]+)"', ship_block)
     return aliens, player
 
 
@@ -111,13 +109,13 @@ def icon_content(size, transparent):
     s_text = max(1, int(29 * unit))
     draw_centred_text(img, "ULTRA", int(110 * unit), s_text, banded=True)
     s_alien = max(1, int(30 * unit))
-    alien = ALIENS[15]
-    draw_rows(img, alien, (size - 12 * s_alien) // 2, int(385 * unit), s_alien, RED)
-    s_ship = max(1, int(34 * unit))
-    draw_rows(img, PLAYER, (size - 15 * s_ship) // 2, int(680 * unit), s_ship, GREEN)
+    alien = ALIENS[15][0]
+    draw_rows(img, alien, (size - 12 * s_alien) // 2, int(330 * unit), s_alien, GREEN)
+    s_ship = max(1, int(22 * unit))
+    draw_rows(img, PLAYER, (size - 18 * s_ship) // 2, int(652 * unit), s_ship, CYAN)
     # a couple of shots between ship and alien
     shot_w = max(1, s_ship // 2)
-    for sy in (int(640 * unit), int(600 * unit)):
+    for sy in (int(612 * unit), int(640 * unit)):
         for dy in range(int(24 * unit)):
             for dx in range(shot_w):
                 img.putpixel((size // 2 - shot_w // 2 + dx, sy - dy), YELLOW + (255,))
@@ -147,11 +145,30 @@ def make_splash(w, h):
     for i in range(8):
         k = i * 2
         x = int((1920 / 2 - 4 * 180 + i * 180 + 90) * u) - 6 * s_alien
-        draw_rows(img, ALIENS[k], x, int(380 * u), s_alien, WAVE_COLOURS[k])
-    s_ship = max(1, int(9 * u))
-    draw_rows(img, PLAYER, (w - 15 * s_ship) // 2, int(560 * u), s_ship, GREEN)
+        draw_rows(img, ALIENS[k][0], x, int(380 * u), s_alien, WAVE_COLOURS[k])
+    s_ship = max(1, int(8 * u))
+    draw_rows(img, PLAYER, (w - 18 * s_ship) // 2, int(540 * u), s_ship, CYAN)
     draw_centred_text(img, "BY PFJ", int(740 * u), max(1, int(9 * u)), WHITE)
     draw_centred_text(img, "BASED ON THE PSS ORIC GAME", int(900 * u), max(1, int(4 * u)), YELLOW)
+    return img
+
+
+def make_feature_graphic():
+    """Google Play feature graphic, 1024x500."""
+    w, h = 1024, 500
+    img = Image.new("RGB", (w, h), BLACK)
+    stars(img, 140, 11, 2)
+    draw_centred_text(img, "THE ULTRA", 40, 12, banded=True)
+    for i, k in enumerate((0, 1, 2, 4, 5, 7, 11, 15)):
+        x = 64 + i * 120
+        draw_rows(img, ALIENS[k][0], x, 170, 5, GREEN)
+    draw_rows(img, PLAYER, (w - 18 * 7) // 2, 280, 7, CYAN)
+    for dy in range(0, 40, 14):
+        for yy in range(8):
+            img.putpixel((w // 2 - 1, 262 - dy - yy), WHITE)
+            img.putpixel((w // 2, 262 - dy - yy), WHITE)
+    draw_centred_text(img, "16 SHEETS OF CLASSIC ORIC ARCADE ACTION", 420, 3, YELLOW)
+    draw_centred_text(img, "BY PFJ - BASED ON THE PSS ORIC GAME", 456, 2, MAGENTA)
     return img
 
 
@@ -182,6 +199,9 @@ def main():
 
     # Store / README artwork
     save(make_icon(512), "art", "icon-512.png")
+    save(make_feature_graphic(), "store", "google-play", "feature-graphic-1024x500.png")
+    save(make_icon(512), "store", "google-play", "icon-512.png")
+    save(make_icon(1024), "store", "app-store", "icon-1024.png")
     save(make_splash(1920, 1080), "art", "splash-1920x1080.png")
 
 

@@ -5,62 +5,17 @@ using Microsoft.Xna.Framework.Graphics;
 namespace Ultra.Core;
 
 /// <summary>
-/// All game graphics are defined here as pixel strings ('X' = ink) and turned into
-/// white textures at start-up, then tinted with an Oric palette colour when drawn.
+/// Game graphics are pixel strings ('X' = ink) turned into white textures at start-up and
+/// tinted with an Oric palette colour when drawn. The aliens, ship and bomb are the original
+/// game's character graphics (see <see cref="OriginalData"/>).
 /// </summary>
 public sealed class SpriteArt
 {
     public const int AlienTypes = 16;
+    public const int AlienFrames = 3;
 
-    // Each alien: 6 rows of body, then two alternative 2-row "leg" rows for the animation frames.
-    private static readonly string[][] Aliens =
-    {
-        new[] { "..X......X..", "...X....X...", "..XXXXXXXX..", ".XX.XXXX.XX.", "XXXXXXXXXXXX", "X.XXXXXXXX.X",
-                "X.X......X.X", "...XX..XX...", "..X......X..", ".X........X." },
-        new[] { "....XXXX....", "..XXXXXXXX..", ".XXXXXXXXXX.", ".XX..XX..XX.", ".XXXXXXXXXX.", "...XX..XX...",
-                "..XX.XX.XX..", "XX........XX", "..X..XX..X..", ".X.X....X.X." },
-        new[] { "X....XX....X", "XX..XXXX..XX", "XXX.X..X.XXX", ".XXXXXXXXXX.", "..XXXXXXXX..", "....XXXX....",
-                "...X....X...", "..X......X..", "....X..X....", "....X..X...." },
-        new[] { "...XXXXXX...", ".XXXXXXXXXX.", "XXX..XX..XXX", "XXX.XXXX.XXX", "XXXXXXXXXXXX", ".XXXXXXXXXX.",
-                "..X.X..X.X..", ".X...XX...X.", "...X.XX.X...", "..X..XX..X.." },
-        new[] { ".....XX.....", "....XXXX....", "...XX..XX...", "..XX.XX.XX..", ".XX.XXXX.XX.", "..XX.XX.XX..",
-                "...XX..XX...", "....XXXX....", "...X.XX.X...", "....X..X...." },
-        new[] { "X..........X", "XX...XX...XX", "XXX.XXXX.XXX", "XXXXX..XXXXX", ".XXXXXXXXXX.", "..XXX..XXX..",
-                "...X....X...", "............", "..X......X..", ".X........X." },
-        new[] { "...XXXXXX...", "..XXXXXXXX..", ".XX.XXXX.XX.", ".XXXXXXXXXX.", ".X.X.XX.X.X.", ".X.X.XX.X.X.",
-                "X.X..XX..X.X", "..X......X..", ".X.X.XX.X.X.", ".X...XX...X." },
-        new[] { ".....XX.....", "....XXXX....", "...XXXXXX...", "..XX.XX.XX..", "..XXXXXXXX..", ".XXXXXXXXXX.",
-                "XX.X.XX.X.XX", "X..X....X..X", "XX.X.XX.X.XX", "...X....X..." },
-        new[] { "...XXXXXX...", ".XXXXXXXXXX.", "XX.XXXXXX.XX", "XXXXXXXXXXXX", "XXXXXXXXXXXX", ".XXXXXXXXXX.",
-                "..X..XX..X..", ".X...XX...X.", ".X...XX...X.", "..X..XX..X.." },
-        new[] { ".....XX.....", ".....XX.....", "..X.XXXX.X..", "...XXXXXX...", "XXXXX..XXXXX", "...XXXXXX...",
-                "..X.XXXX.X..", ".....XX.....", ".X..XXXX..X.", "X....XX....X" },
-        new[] { ".....XX.....", "....XXXX....", "...XXXXXX...", "..XX.XX.XX..", "..XXXXXXXX..", "...XXXXXX...",
-                "....XXXX....", ".....XX.....", "...X.XX.X...", "....X..X...." },
-        new[] { "....XXXX....", "...XXXXXX...", "..XXXXXXXX..", "..X.XXXX.X..", ".XXXXXXXXXX.", "XXXXXXXXXXXX",
-                ".....XX.....", ".....XX.....", "....X..X....", "...X....X..." },
-        new[] { "...XXXXXX...", "..XXXXXXXX..", ".XX..XX..XX.", ".XX..XX..XX.", ".XXXXXXXXXX.", ".XXXXXXXXXX.",
-                ".XX.XX.XX.X.", ".X...X...X..", ".X.XX.XX.XX.", "..X...X...X." },
-        new[] { "X....XX....X", "X...XXXX...X", "XX.XX..XX.XX", "XXXXXXXXXXXX", "XX..XXXX..XX", "X....XX....X",
-                ".....XX.....", "....X..X....", "....XXXX....", "...X....X..." },
-        new[] { "...XXXXXX...", "..XXXXXXXX..", ".XX..XX..XX.", ".XXXXXXXXXX.", "..XXX..XXX..", "...XXXXXX...",
-                "...X.XX.X...", "............", "....X..X....", "...X.XX.X..." },
-        new[] { "X.XXXXXXXX.X", "XXX.XXXX.XXX", "XXXXXXXXXXXX", ".XX.X..X.XX.", "..XXXXXXXX..", ".X.X.XX.X.X.",
-                "X..X....X..X", ".X........X.", ".X.X....X.X.", "X..........X" },
-    };
-
-    private static readonly string[] PlayerRows =
-    {
-        ".......X.......",
-        "......XXX......",
-        "......XXX......",
-        "..X..XXXXX..X..",
-        "..X.XXXXXXX.X..",
-        ".XXXXX.X.XXXXX.",
-        "XXXXXXXXXXXXXXX",
-        "XX..XX...XX..XX",
-        "X....X...X....X",
-    };
+    /// <summary>The original animates each alien through frames 0, 1, 2, 1.</summary>
+    public static int FrameAt(int tick) => tick % 4 == 3 ? 1 : tick % 4;
 
     private static readonly string[] Boom1 =
     {
@@ -74,14 +29,11 @@ public sealed class SpriteArt
         "X...X..X...X", "..X......X..", "X....X....X.", "............",
     };
 
-    private static readonly string[] Bomb1 = { ".X.", "X..", ".X.", "..X", ".X." };
-    private static readonly string[] Bomb2 = { ".X.", "..X", ".X.", "X..", ".X." };
-
     public Texture2D Pixel { get; }
     public Texture2D Player { get; }
-    public Texture2D[,] Alien { get; } = new Texture2D[AlienTypes, 2];
+    public Texture2D[,] Alien { get; } = new Texture2D[AlienTypes, AlienFrames];
     public Texture2D[] Explosion { get; } = new Texture2D[2];
-    public Texture2D[] Bomb { get; } = new Texture2D[2];
+    public Texture2D[] Bomb { get; } = new Texture2D[1];
     public Texture2D Triangle { get; }
     public Texture2D Circle { get; }
 
@@ -90,18 +42,14 @@ public sealed class SpriteArt
         Pixel = new Texture2D(device, 1, 1);
         Pixel.SetData(new[] { Color.White });
 
-        Player = Build(device, PlayerRows);
+        Player = Build(device, OriginalData.PlayerShip);
         for (int i = 0; i < AlienTypes; i++)
-        {
-            var a = Aliens[i];
-            Alien[i, 0] = Build(device, new[] { a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7] });
-            Alien[i, 1] = Build(device, new[] { a[0], a[1], a[2], a[3], a[4], a[5], a[8], a[9] });
-        }
+            for (int f = 0; f < AlienFrames; f++)
+                Alien[i, f] = Build(device, OriginalData.AlienFrames[i][f]);
 
         Explosion[0] = Build(device, Boom1);
         Explosion[1] = Build(device, Boom2);
-        Bomb[0] = Build(device, Bomb1);
-        Bomb[1] = Build(device, Bomb2);
+        Bomb[0] = Build(device, OriginalData.Bomb);
         Triangle = BuildTriangle(device, 96);
         Circle = BuildCircle(device, 128);
     }

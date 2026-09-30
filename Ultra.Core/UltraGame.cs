@@ -443,9 +443,9 @@ public class UltraGame : Game
         float fade = Math.Clamp(_stateTime / 0.5f, 0f, 1f);
 
         DrawLogo(40);
-        r.Sprite(r.Art.Player, 120, 92, Palette.Green * fade);
+        r.Sprite(r.Art.Player, 120, 92, Palette.Cyan * fade);
         for (int i = 0; i < 5; i++)
-            r.Sprite(r.Art.Alien[i * 3, (int)(_clock * 4f) % 2], 48 + i * 36, 120, World.WaveColors[i * 3] * fade);
+            r.Sprite(r.Art.Alien[i * 3, SpriteArt.FrameAt((int)(_clock * 6f))], 48 + i * 36, 120, World.WaveColors[i * 3] * fade);
 
         r.TextCentered("BY PFJ", 150, Palette.White * fade, 2f);
         r.TextCentered("BASED ON THE PSS ORIC GAME", 180, Palette.Yellow * fade);
@@ -484,8 +484,8 @@ public class UltraGame : Game
         string move = _input.HasTilt ? "TILT THE DEVICE TO STEER YOUR SHIP." : "USE THE ARROW BUTTONS TO MOVE.";
         var lines = new (string Text, Color Color)[]
         {
-            ("DESTROY 16 WAVES OF ALIENS - EACH", Palette.White),
-            ("WAVE ATTACKS IN ITS OWN WAY.", Palette.White),
+            ("DESTROY ALL 16 SHEETS OF ALIENS -", Palette.White),
+            ("EACH SHEET MOVES IN ITS OWN WAY.", Palette.White),
             ("", Palette.White),
             (move, Palette.Green),
             ("TAP ANYWHERE TO FIRE. HOLD YOUR", Palette.Green),
@@ -496,8 +496,8 @@ public class UltraGame : Game
             ("AND THE HEAT CARRIES ON INTO THE", Palette.Yellow),
             ("NEXT WAVE.", Palette.Yellow),
             ("", Palette.White),
-            ("DODGE THE BOMBS AND DIVING ALIENS.", Palette.Red),
-            ("EXTRA LIFE EVERY 10000 POINTS.", Palette.Magenta),
+            ("DODGE THE BOMBS AND THE ALIENS.", Palette.Red),
+            ("BONUS LIVES AT 2000 AND 10000.", Palette.Magenta),
         };
 
         for (int i = 0; i < lines.Length; i++)
@@ -512,12 +512,12 @@ public class UltraGame : Game
         {
             int col = i / 8, row = i % 8;
             float x = 4 + col * 118, y = 50 + row * 16;
-            r.Sprite(r.Art.Alien[i, (int)(_clock * 3f + i) % 2], x + 6, y + 3, World.WaveColors[i]);
+            r.Sprite(r.Art.Alien[i, SpriteArt.FrameAt((int)(_clock * 6f) + i)], x + 6, y + 3, World.WaveColors[i]);
             r.Text(World.WaveNames[i], x + 16, y, World.WaveColors[i]);
             string pts = World.PointsFor(i, 0).ToString();
             r.Text(pts, x + 112 - PixelFont.Measure(pts), y, Palette.White);
         }
-        r.TextCentered("DIVING ALIENS SCORE DOUBLE", 180, Palette.Green);
+        r.TextCentered("CLEAR ALL 16 FOR A 5000 BONUS", 180, Palette.Green);
     }
 
     private void DrawHallOfFame()
@@ -577,7 +577,7 @@ public class UltraGame : Game
             r.Frame(30, 150, 180, 12, Palette.Blue);
             r.Rect(119, 151, 2, 10, Palette.Blue);
             float x = 120 + Math.Clamp(_input.Move, -1f, 1f) * 84f;
-            r.Sprite(r.Art.Player, x, 156, Palette.Green);
+            r.Sprite(r.Art.Player, x, 156, Palette.Cyan);
         }
         else
             r.TextCentered("NO MOTION SENSOR FOUND", 150, Palette.Red);
