@@ -181,19 +181,20 @@ App Store Connect scales these down for the smaller displays automatically.
 
 ## Building the uploads
 
-**Google Play (.aab):** you need an upload keystore. Create one once and keep it safe:
+Run:
 ```sh
-keytool -genkeypair -v -keystore ultra-upload.keystore -alias ultra -keyalg RSA -keysize 2048 -validity 10000
-dotnet publish Ultra.Android/Ultra.Android.csproj -c Release -f net10.0-android \
-  -p:AndroidPackageFormat=aab -p:AndroidKeyStore=true \
-  -p:AndroidSigningKeyStore=ultra-upload.keystore -p:AndroidSigningKeyAlias=ultra \
-  -p:AndroidSigningKeyPass=env:ULTRA_KEY_PASS -p:AndroidSigningStorePass=env:ULTRA_STORE_PASS
+tools/build_release.sh
 ```
-Raise `ApplicationVersion` in `Ultra.Android/Ultra.Android.csproj` for every upload.
+It creates:
 
-**App Store (.ipa):** set your team's distribution signing identity and provisioning profile, then:
-```sh
-dotnet publish Ultra.iOS/Ultra.iOS.csproj -c Release -f net10.0-ios -p:ArchiveOnBuild=true \
-  -p:RuntimeIdentifier=ios-arm64 -p:CodesignKey="Apple Distribution: …" -p:CodesignProvision="…"
-```
-Upload the .ipa with Transporter or `xcrun altool`. Raise `ApplicationVersion` in `Ultra.iOS/Ultra.iOS.csproj` for every upload.
+| File | Use |
+|---|---|
+| `release/android/uk.co.allthejohnsons.theultra-Signed.aab` | Upload to Google Play |
+| `release/android/uk.co.allthejohnsons.theultra-Signed.apk` | Install directly for testing |
+| `release/ios/Ultra.iOS.ipa` | Upload to App Store Connect (Transporter app, or `xcrun altool --upload-app`) |
+
+**Android signing:** the upload key is `~/keys/ultra-upload.jks` (alias `ultra`), and its password is in your login Keychain under "The Ultra Android upload keystore". Back up both. You can't publish updates without the key unless you ask Google for an upload-key reset. Use Play App Signing when you create the app in Play Console.
+
+**iOS signing:** "Apple Distribution: Paul Johnson (3UH7BE38T3)" with the App Store profile `rel-ultra` (bundle ID `uk.co.allthejohnsons.theultra`).
+
+Raise `ApplicationVersion` (the build number) in both `.csproj` files for every upload, and `ApplicationDisplayVersion` for each new release.

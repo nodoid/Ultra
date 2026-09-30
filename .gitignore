@@ -6,3 +6,4 @@ obj/
 *.suo
 .DS_Store
 *.DotSettings.user
+release/

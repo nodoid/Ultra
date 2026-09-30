@@ -3,13 +3,22 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>net10.0-android</TargetFramework>
     <SupportedOSPlatformVersion>23</SupportedOSPlatformVersion>
-    <ApplicationId>com.pauljohnson.ultra</ApplicationId>
+    <ApplicationId>uk.co.allthejohnsons.theultra</ApplicationId>
     <ApplicationTitle>The Ultra</ApplicationTitle>
     <ApplicationVersion>1</ApplicationVersion>
     <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
     <AssemblyName>Ultra</AssemblyName>
     <Authors>Paul F. Johnson</Authors>
     <Copyright>Copyright © 2026 Paul F. Johnson</Copyright>
+  </PropertyGroup>
+  <!-- Play upload key. The password is never stored: pass it in ULTRA_KEYSTORE_PASS
+       (tools/build_release.sh reads it from the macOS Keychain). -->
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <AndroidKeyStore>true</AndroidKeyStore>
+    <AndroidSigningKeyStore>$(HOME)/keys/ultra-upload.jks</AndroidSigningKeyStore>
+    <AndroidSigningKeyAlias>ultra</AndroidSigningKeyAlias>
+    <AndroidSigningStorePass>env:ULTRA_KEYSTORE_PASS</AndroidSigningStorePass>
+    <AndroidSigningKeyPass>env:ULTRA_KEYSTORE_PASS</AndroidSigningKeyPass>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\Ultra.Core\Ultra.Core.csproj" />

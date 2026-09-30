@@ -3,13 +3,25 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>net10.0-ios</TargetFramework>
     <SupportedOSPlatformVersion>15.0</SupportedOSPlatformVersion>
-    <ApplicationId>com.pauljohnson.ultra</ApplicationId>
+    <ApplicationId>uk.co.allthejohnsons.theultra</ApplicationId>
     <ApplicationTitle>The Ultra</ApplicationTitle>
     <ApplicationVersion>1</ApplicationVersion>
     <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
     <Authors>Paul F. Johnson</Authors>
     <Copyright>Copyright © 2026 Paul F. Johnson</Copyright>
+    <AppIcon>AppIcon</AppIcon>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
     <CodesignKey>iPhone Developer</CodesignKey>
+  </PropertyGroup>
+  <!-- App Store distribution: signing identity and provisioning profile (rel-ultra) from the Apple team 3UH7BE38T3. -->
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <RuntimeIdentifier>ios-arm64</RuntimeIdentifier>
+    <CodesignKey>Apple Distribution: Paul Johnson (3UH7BE38T3)</CodesignKey>
+    <CodesignProvision>rel-ultra</CodesignProvision>
+    <CodesignEntitlements>Entitlements.plist</CodesignEntitlements>
+    <ArchiveOnBuild>true</ArchiveOnBuild>
+    <BuildIpa>true</BuildIpa>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\Ultra.Core\Ultra.Core.csproj" />

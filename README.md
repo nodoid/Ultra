@@ -72,6 +72,8 @@ dotnet build Ultra.iOS/Ultra.iOS.csproj
 
 You need the .NET 10 SDK with the `android` and `ios` workloads installed.
 
+To build the signed store packages (Google Play .aab/.apk and App Store .ipa) into `release/`, run `tools/build_release.sh`. See `store/LISTING.md` for details of the signing setup.
+
 ## Credits
 
 - Original game: *The Ultra* by J.B. Marshall, published by PSS in 1983 for the Oric-1 and Atmos.
