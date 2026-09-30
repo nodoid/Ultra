@@ -24,6 +24,13 @@ public class UltraGame : Game
     private static readonly Rectangle DeleteKey = new(90, 180, 60, 16);
     private static readonly Rectangle EndKey = new(160, 180, 60, 16);
 
+    // Title page arrows (touch areas are larger than the drawn buttons)
+    private static readonly Rectangle PrevPageKey = new(4, 208, 20, 14);
+    private static readonly Rectangle NextPageKey = new(216, 208, 20, 14);
+    private static readonly Rectangle PrevPageZone = new(-40, 196, 84, 60);
+    private static readonly Rectangle NextPageZone = new(196, 196, 84, 60);
+    private const float ManualPageHold = 10f;
+
     // Pause menu
     private static readonly Rectangle ResumeKey = new(80, 100, 80, 14);
     private static readonly Rectangle OptionsKey = new(80, 118, 80, 14);
@@ -60,6 +67,7 @@ public class UltraGame : Game
     private int _highlightRank = -1;
     private int _pendingRank;
     private bool _optionsFromPause;
+    private float _pageTime;
 
     public UltraGame(ITiltSensor tiltSensor = null)
     {
@@ -84,7 +92,7 @@ public class UltraGame : Game
 
     protected override void LoadContent()
     {
-        _screen = new RenderTarget2D(GraphicsDevice, Renderer.Width, Renderer.Height);
+        _screen = new RenderTarget2D(GraphicsDevice, Renderer.Width * Renderer.Supersample, Renderer.Height * Renderer.Supersample);
         _renderer = new Renderer(GraphicsDevice);
         _sfx = new Sfx();
     }
@@ -104,7 +112,7 @@ public class UltraGame : Game
         switch (_state)
         {
             case State.Splash: UpdateSplash(); break;
-            case State.Title: UpdateTitle(); break;
+            case State.Title: UpdateTitle(dt); break;
             case State.Playing: UpdatePlaying(dt); break;
             case State.EnterName: UpdateEnterName(); break;
             case State.Options: UpdateOptions(); break;
@@ -117,6 +125,8 @@ public class UltraGame : Game
     {
         _state = state;
         _stateTime = 0f;
+        if (state == State.Title)
+            _pageTime = 0f;
     }
 
     private void UpdateSplash()
@@ -128,8 +138,10 @@ public class UltraGame : Game
         }
     }
 
-    private void UpdateTitle()
+    private void UpdateTitle(float dt)
     {
+        _pageTime += dt;
+
         if (_input.BackPressed)
         {
             if (OperatingSystem.IsAndroid())
@@ -143,7 +155,31 @@ public class UltraGame : Game
             return;
         }
 
-        if (_stateTime > 0.4f && (_input.AnyPressed || _input.ConfirmPressed))
+        if (_input.Swipe != 0)
+        {
+            // Swipe left for the next page, as with a book.
+            ChangeTitlePage(-_input.Swipe, true);
+            return;
+        }
+
+        if (_input.NewKeys.Contains(Keys.Left))
+            ChangeTitlePage(-1, true);
+        else if (_input.NewKeys.Contains(Keys.Right))
+            ChangeTitlePage(1, true);
+
+        bool start = _input.ConfirmPressed;
+        foreach (var tap in _input.TapReleases)
+        {
+            var p = tap.ToPoint();
+            if (PrevPageZone.Contains(p))
+                ChangeTitlePage(-1, true);
+            else if (NextPageZone.Contains(p))
+                ChangeTitlePage(1, true);
+            else
+                start = true;
+        }
+
+        if (_stateTime > 0.4f && start)
         {
             _world = new World(_sfx);
             _paused = false;
@@ -152,11 +188,14 @@ public class UltraGame : Game
             return;
         }
 
-        if (_stateTime > TitlePageTimes[_titlePage])
-        {
-            _titlePage = (_titlePage + 1) % TitlePages;
-            _stateTime = 0.4f;
-        }
+        if (_pageTime > TitlePageTimes[_titlePage])
+            ChangeTitlePage(1, false);
+    }
+
+    private void ChangeTitlePage(int step, bool manual)
+    {
+        _titlePage = (_titlePage + step + TitlePages) % TitlePages;
+        _pageTime = manual ? -ManualPageHold : 0f;
     }
 
     private void UpdatePlaying(float dt)
@@ -364,7 +403,7 @@ public class UltraGame : Game
         GraphicsDevice.Clear(Palette.Black);
 
         var batch = _renderer.Batch;
-        batch.Begin(samplerState: SamplerState.PointClamp);
+        batch.Begin(samplerState: SamplerState.PointClamp, transformMatrix: Matrix.CreateScale(Renderer.Supersample));
         switch (_state)
         {
             case State.Splash: DrawSplash(); break;
@@ -430,6 +469,11 @@ public class UltraGame : Game
             r.TextCentered(_input.HasTilt ? "TILT TO MOVE - TAP TO FIRE" : "ARROWS TO MOVE - TAP TO FIRE", 196, Palette.Cyan);
         if ((int)(_clock * 2f) % 2 == 0)
             r.TextCentered("TOUCH TO PLAY", 210, Palette.Yellow);
+
+        DrawKey(PrevPageKey, "<", Palette.White);
+        DrawKey(NextPageKey, ">", Palette.White);
+        for (int i = 0; i < TitlePages; i++)
+            r.Rect(30 + i * 6, 213, 3, 3, i == _titlePage ? Palette.Yellow : Palette.Blue);
     }
 
     private void DrawHowToPlay()

@@ -11,7 +11,7 @@ Written by **Paul F. Johnson**.
 - **16 waves of aliens**, each with its own animated graphics and attack pattern: Marchers, Wavers, Swoopers, Bouncers, Orbiters, Zigzaggers, Loopers, Kamikazes, Centipedes, Spirallers, Raindrops, Pendulums, Phantoms, Crossfire, Hunters and the Ultra. After wave 16 the cycle repeats, faster and for more points.
 - **Gun overheating.** The machine gun heats up with every shot. If it reaches the limit it locks until it has cooled. The temperature carries over from one wave to the next, so you start each wave with the gun as hot as you left it.
 - Aliens score 10 points on wave 1, rising by 5 per wave to 85 for the Ultra on wave 16. Diving aliens score double. You get an extra life every 10,000 points.
-- Oric-style presentation: a 240x224 screen with the in-game sprites drawn at double size (chunky Oric pixels), the eight Oric colours, a 6x8 character-cell font, and AY-style square-wave and noise sound effects synthesised at runtime.
+- Oric-style presentation: a 240x224 screen with the in-game sprites drawn at 1.5x size (the screen is rendered at 2x internally so every pixel stays even), the eight Oric colours, a 6x8 character-cell font, and AY-style square-wave and noise sound effects synthesised at runtime.
 
 ### High scores
 
@@ -37,7 +37,7 @@ Options are saved (`ultra_settings.txt`) and restored when the game starts.
 
 ### Title screen
 
-The title screen cycles through three pages: **How to Play**, **Points per Alien** (every alien with its name and score) and the **Hall of Fame**.
+The title screen cycles through three pages: **How to Play**, **Points per Alien** (every alien with its name and score) and the **Hall of Fame**. To move between pages yourself, swipe left or right, tap the ‹ › buttons in the bottom corners, or use the arrow keys. A page you choose stays on screen for longer before the cycle continues. Tap anywhere else to start a game.
 
 Tilt uses the gyroscope-fused gravity vector: CoreMotion device motion on iOS and the `TYPE_GRAVITY` sensor on Android. On Android devices without a gyroscope it falls back to a filtered accelerometer. If the device has no motion sensor at all (for example the iOS Simulator), on-screen left and right buttons appear in the left margin instead. Hardware keyboards and game pads also work: arrow keys, Space or Ctrl to fire, P to pause, Esc to go back.
 

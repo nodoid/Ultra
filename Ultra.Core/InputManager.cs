@@ -13,6 +13,11 @@ namespace Ultra.Core;
 /// </summary>
 public sealed class InputManager
 {
+    private const float SwipeFraction = 0.08f;     // of screen width
+    private const float TapSlopFraction = 0.03f;   // movement still counted as a tap
+    private const long SwipeMaxMs = 700;
+
+    private readonly Dictionary<int, (Vector2 Start, long Time, bool OnPause)> _touchStarts = new();
     private readonly ITiltSensor _tilt;
     private readonly Settings _settings;
     private KeyboardState _prevKeys;
@@ -45,19 +50,36 @@ public sealed class InputManager
     /// <summary>New touches this frame, in virtual (240x224) coordinates.</summary>
     public List<Vector2> Taps { get; } = new();
 
+    /// <summary>Touches lifted this frame without moving far, in virtual coordinates.</summary>
+    public List<Vector2> TapReleases { get; } = new();
+
+    /// <summary>-1 for a swipe to the left, 1 for a swipe to the right, 0 for none.</summary>
+    public int Swipe { get; private set; }
+
     /// <summary>Keys that went down this frame.</summary>
     public List<Keys> NewKeys { get; } = new();
 
     public void Update(ScreenLayout layout)
     {
         Taps.Clear();
+        TapReleases.Clear();
         NewKeys.Clear();
+        Swipe = 0;
         Left = Right = Fire = FirePressed = PausePressed = BackPressed = ConfirmPressed = AnyPressed = false;
 
+        long now = Environment.TickCount64;
         foreach (var touch in TouchPanel.GetState())
         {
+            if (touch.State == TouchLocationState.Released)
+            {
+                TrackRelease(touch, layout, now);
+                continue;
+            }
             if (touch.State != TouchLocationState.Pressed && touch.State != TouchLocationState.Moved)
                 continue;
+
+            if (touch.State == TouchLocationState.Pressed)
+                _touchStarts[touch.Id] = (touch.Position, now, layout.PauseButton.Contains(touch.Position.ToPoint()));
 
             var p = touch.Position.ToPoint();
             bool isNew = touch.State == TouchLocationState.Pressed;
@@ -92,14 +114,16 @@ public sealed class InputManager
         Right |= keys.IsKeyDown(Keys.Right) || pad.DPad.Right == ButtonState.Pressed || pad.ThumbSticks.Left.X > 0.4f;
         Fire |= keys.IsKeyDown(Keys.Space) || keys.IsKeyDown(Keys.LeftControl) || pad.Buttons.A == ButtonState.Pressed;
 
-        FirePressed |= NewKeys.Contains(Keys.Space) || NewKeys.Contains(Keys.LeftControl) ||
+        bool keyFire = NewKeys.Contains(Keys.Space) || NewKeys.Contains(Keys.LeftControl) ||
                        (pad.Buttons.A == ButtonState.Pressed && _prevPad.Buttons.A == ButtonState.Released);
-        ConfirmPressed = FirePressed || NewKeys.Contains(Keys.Enter) ||
+        FirePressed |= keyFire;
+        // Keyboard / pad only: on touch screens menus act on taps, so a swipe never starts a game.
+        ConfirmPressed = keyFire || NewKeys.Contains(Keys.Enter) ||
                          (pad.Buttons.Start == ButtonState.Pressed && _prevPad.Buttons.Start == ButtonState.Released);
         PausePressed |= NewKeys.Contains(Keys.P);
         BackPressed = NewKeys.Contains(Keys.Escape) ||
                       (pad.Buttons.Back == ButtonState.Pressed && _prevPad.Buttons.Back == ButtonState.Released);
-        AnyPressed |= NewKeys.Any() || FirePressed || ConfirmPressed;
+        AnyPressed |= NewKeys.Any() || keyFire || ConfirmPressed;
 
         // Digital controls win over tilt so a keyboard or pad always works.
         if (Left || Right)
@@ -118,5 +142,19 @@ public sealed class InputManager
 
         _prevKeys = keys;
         _prevPad = pad;
+    }
+
+    private void TrackRelease(TouchLocation touch, ScreenLayout layout, long now)
+    {
+        if (!_touchStarts.Remove(touch.Id, out var start) || start.OnPause)
+            return;
+
+        var delta = touch.Position - start.Start;
+        float width = layout.ScreenWidth;
+        if (Math.Abs(delta.X) >= width * SwipeFraction && Math.Abs(delta.X) > Math.Abs(delta.Y) * 1.5f &&
+            now - start.Time <= SwipeMaxMs)
+            Swipe = delta.X < 0 ? -1 : 1;
+        else if (delta.Length() <= width * TapSlopFraction)
+            TapReleases.Add(layout.ToVirtual(touch.Position));
     }
 }

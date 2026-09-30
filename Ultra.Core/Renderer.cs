@@ -11,6 +11,12 @@ public sealed class Renderer
     public const int Width = 240;
     public const int Height = 224;
 
+    /// <summary>
+    /// The virtual screen is rendered at this multiple of 240x224 so sprites can be drawn at
+    /// 1.5x while every Oric pixel stays a whole number of render-target pixels.
+    /// </summary>
+    public const int Supersample = 2;
+
     public SpriteBatch Batch { get; }
     public PixelFont Font { get; }
     public SpriteArt Art { get; }

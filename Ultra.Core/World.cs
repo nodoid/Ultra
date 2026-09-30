@@ -44,9 +44,10 @@ public sealed class World
     public const float PlayerY = 194f;
     private const float PlayTop = 18f;
 
-    // All in-game sprites are drawn at double size; these are the matching half-extents.
-    public const float SpriteScale = 2f;
-    private const float AlienHalfW = 12f, AlienHalfH = 8f;
+    // In-game sprites are drawn at 1.5x their pixel-art size; these are the matching half-extents.
+    public const float SpriteScale = 1.5f;
+    private const float AlienHalfW = 6f * SpriteScale, AlienHalfH = 4f * SpriteScale;
+    private const float ShotLength = 4f * SpriteScale;
     private const float MinX = 14f, MaxX = 226f;    // alien centre limits
     private const float LowestY = 160f;              // lowest alien centre for roaming waves
     private const float PlayerSpeed = 110f;
@@ -197,7 +198,7 @@ public sealed class World
             Heat -= Cooling * dt;
             if (input.Fire && _fireCooldown <= 0f && _shots.Count < 8)
             {
-                _shots.Add(new Projectile { X = _playerX, Y = PlayerY - 16 });
+                _shots.Add(new Projectile { X = _playerX, Y = PlayerY - 8f * SpriteScale });
                 _fireCooldown = FireInterval;
                 Heat += HeatPerShot;
                 _sfx.Shoot();
@@ -248,7 +249,7 @@ public sealed class World
             ? candidates.OrderBy(a => Math.Abs(a.X - _playerX)).First()
             : candidates[_rng.Next(candidates.Count)];
 
-        _bombs.Add(new Projectile { X = shooter.X, Y = shooter.Y + 12, VY = (75f + Pattern * 3f) * Mult });
+        _bombs.Add(new Projectile { X = shooter.X, Y = shooter.Y + 6f * SpriteScale, VY = (75f + Pattern * 3f) * Mult });
     }
 
     private void CheckCollisions()
@@ -259,7 +260,7 @@ public sealed class World
             {
                 if (!a.Alive || !a.Visible)
                     continue;
-                if (Math.Abs(s.X - a.X) <= AlienHalfW && s.Y <= a.Y + AlienHalfH && s.Y + 8f >= a.Y - AlienHalfH)
+                if (Math.Abs(s.X - a.X) <= AlienHalfW && s.Y <= a.Y + AlienHalfH && s.Y + ShotLength >= a.Y - AlienHalfH)
                 {
                     KillAlien(a, true);
                     s.Y = -100f;
@@ -274,7 +275,8 @@ public sealed class World
 
         foreach (var b in _bombs)
         {
-            if (Math.Abs(b.X - _playerX) <= 12f && b.Y + 5f >= PlayerY - 6f && b.Y - 5f <= PlayerY + 8f)
+            if (Math.Abs(b.X - _playerX) <= 6f * SpriteScale && b.Y + 2.5f * SpriteScale >= PlayerY - 3f * SpriteScale &&
+                b.Y - 2.5f * SpriteScale <= PlayerY + 4f * SpriteScale)
             {
                 KillPlayer();
                 return;
@@ -283,7 +285,7 @@ public sealed class World
 
         foreach (var a in _aliens)
         {
-            if (a.Alive && a.Visible && Math.Abs(a.X - _playerX) < 22f && Math.Abs(a.Y - PlayerY) < 16f)
+            if (a.Alive && a.Visible && Math.Abs(a.X - _playerX) < 11f * SpriteScale && Math.Abs(a.Y - PlayerY) < 8f * SpriteScale)
             {
                 KillAlien(a, false);
                 KillPlayer();
@@ -701,7 +703,7 @@ public sealed class World
             }
         }
 
-        if (_playerAlive && alive.Max(a => a.Y) >= PlayerY - 24f)
+        if (_playerAlive && alive.Max(a => a.Y) >= PlayerY - 12f * SpriteScale)
         {
             _groupY = 0f;
             KillPlayer();
@@ -873,7 +875,7 @@ public sealed class World
             r.Sprite(art.Explosion[b.T < 0.15f ? 0 : 1], b.X, b.Y, b.Color, SpriteScale);
 
         foreach (var s in _shots)
-            r.Rect((int)s.X - 1, (int)s.Y, 2, 8, Palette.Yellow);
+            r.Rect((int)s.X - 0.5f, (int)s.Y, SpriteScale, ShotLength, Palette.Yellow);
 
         int bombFrame = (int)(_clock * 8f) % 2;
         foreach (var b in _bombs)
@@ -883,7 +885,7 @@ public sealed class World
             r.Sprite(art.Player, _playerX, PlayerY, Palette.Green, SpriteScale);
 
         foreach (var p in _particles)
-            r.Rect((int)p.X, (int)p.Y, 2, 2, p.Color);
+            r.Rect((int)p.X, (int)p.Y, SpriteScale, SpriteScale, p.Color);
 
         DrawHud(r, highScore);
 
