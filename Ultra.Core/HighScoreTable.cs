@@ -31,15 +31,11 @@ public sealed class HighScoreTable
         ("MICRODISC", 1000, 2), ("CUMANA", 500, 1),
     };
 
-    private readonly string _path;
+    private readonly string _path = Storage.PathFor(FileName);
     public List<HighScoreEntry> Entries { get; } = new();
 
     public HighScoreTable()
     {
-        string folder = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-        if (string.IsNullOrEmpty(folder))
-            folder = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
-        _path = Path.Combine(folder, FileName);
         Load();
     }
 
@@ -104,20 +100,8 @@ public sealed class HighScoreTable
             Entries.RemoveRange(Capacity, Entries.Count - Capacity);
     }
 
-    private void Save()
-    {
-        try
-        {
-            Directory.CreateDirectory(Path.GetDirectoryName(_path)!);
-            string temp = _path + ".tmp";
-            File.WriteAllLines(temp, Entries.Select(e => $"{e.Score}|{e.Wave}|{e.Name}"), Encoding.UTF8);
-            File.Move(temp, _path, true);
-        }
-        catch (Exception)
-        {
-            // Storage unavailable - the table still works for this session.
-        }
-    }
+    private void Save() =>
+        Storage.WriteAllLines(_path, Entries.Select(e => $"{e.Score}|{e.Wave}|{e.Name}"));
 
     private static string Sanitise(string name)
     {

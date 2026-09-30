@@ -13,17 +13,16 @@ namespace Ultra.Core;
 /// </summary>
 public sealed class InputManager
 {
-    private const float DeadZone = 0.04f;
-    private const float FullTilt = 0.30f;
-
     private readonly ITiltSensor _tilt;
+    private readonly Settings _settings;
     private KeyboardState _prevKeys;
     private GamePadState _prevPad;
     private float _smoothedTilt;
 
-    public InputManager(ITiltSensor tilt)
+    public InputManager(ITiltSensor tilt, Settings settings)
     {
         _tilt = tilt;
+        _settings = settings;
     }
 
     public bool HasTilt => _tilt?.IsAvailable == true;
@@ -107,8 +106,11 @@ public sealed class InputManager
             Move = (Left ? -1f : 0f) + (Right ? 1f : 0f);
         else if (HasTilt)
         {
-            _smoothedTilt += (_tilt.Tilt - _smoothedTilt) * 0.35f;
-            float magnitude = Math.Clamp((Math.Abs(_smoothedTilt) - DeadZone) / (FullTilt - DeadZone), 0f, 1f);
+            float raw = _settings.InvertTilt ? -_tilt.Tilt : _tilt.Tilt;
+            _smoothedTilt += (raw - _smoothedTilt) * 0.35f;
+            float fullTilt = _settings.FullTilt;
+            float deadZone = fullTilt * 0.13f;
+            float magnitude = Math.Clamp((Math.Abs(_smoothedTilt) - deadZone) / (fullTilt - deadZone), 0f, 1f);
             Move = Math.Sign(_smoothedTilt) * magnitude;
         }
         else

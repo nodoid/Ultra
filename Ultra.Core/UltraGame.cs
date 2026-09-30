@@ -12,16 +12,29 @@ namespace Ultra.Core;
 /// </summary>
 public class UltraGame : Game
 {
-    private enum State { Splash, Title, Playing, EnterName }
+    private enum State { Splash, Title, Playing, EnterName, Options }
 
     private const float SplashTime = 3.5f;
-    private const float TitlePageTime = 7f;
+    private const int HowToPlayPage = 0, ScoreTablePage = 1, HallOfFamePage = 2, TitlePages = 3;
+    private static readonly float[] TitlePageTimes = { 12f, 8f, 7f };
 
     private static readonly string[] KeyRows = { "ABCDEFGHIJ", "KLMNOPQRST", "UVWXYZ0123", "456789.-!" };
     private const int KeysX = 20, KeysY = 104, KeyW = 20, KeyH = 18;
     private static readonly Rectangle SpaceKey = new(20, 180, 60, 16);
     private static readonly Rectangle DeleteKey = new(90, 180, 60, 16);
     private static readonly Rectangle EndKey = new(160, 180, 60, 16);
+
+    // Pause menu
+    private static readonly Rectangle ResumeKey = new(80, 100, 80, 14);
+    private static readonly Rectangle OptionsKey = new(80, 118, 80, 14);
+    private static readonly Rectangle QuitKey = new(80, 136, 80, 14);
+
+    // Options screen
+    private static readonly Rectangle MinusKey = new(18, 62, 24, 20);
+    private static readonly Rectangle PlusKey = new(198, 62, 24, 20);
+    private const int SliderX = 50, SliderY = 62, SegmentW = 14, SegmentH = 20;
+    private static readonly Rectangle InvertKey = new(150, 106, 60, 16);
+    private static readonly Rectangle DoneKey = new(90, 190, 60, 16);
 
     private static readonly Color PanelColor = new(6, 6, 22);
     private static readonly Color ButtonColor = new(40, 40, 140);
@@ -30,6 +43,7 @@ public class UltraGame : Game
     private readonly GraphicsDeviceManager _graphics;
     private readonly ScreenLayout _layout = new();
     private readonly InputManager _input;
+    private readonly Settings _settings = new();
     private readonly StringBuilder _name = new();
 
     private RenderTarget2D _screen;
@@ -45,10 +59,11 @@ public class UltraGame : Game
     private bool _paused;
     private int _highlightRank = -1;
     private int _pendingRank;
+    private bool _optionsFromPause;
 
     public UltraGame(ITiltSensor tiltSensor = null)
     {
-        _input = new InputManager(tiltSensor);
+        _input = new InputManager(tiltSensor, _settings);
         _graphics = new GraphicsDeviceManager(this)
         {
             IsFullScreen = true,
@@ -92,6 +107,7 @@ public class UltraGame : Game
             case State.Title: UpdateTitle(); break;
             case State.Playing: UpdatePlaying(dt); break;
             case State.EnterName: UpdateEnterName(); break;
+            case State.Options: UpdateOptions(); break;
         }
 
         base.Update(gameTime);
@@ -121,6 +137,12 @@ public class UltraGame : Game
             return;
         }
 
+        if (_input.PausePressed || _input.NewKeys.Contains(Keys.O))
+        {
+            OpenOptions(false);
+            return;
+        }
+
         if (_stateTime > 0.4f && (_input.AnyPressed || _input.ConfirmPressed))
         {
             _world = new World(_sfx);
@@ -130,9 +152,9 @@ public class UltraGame : Game
             return;
         }
 
-        if (_stateTime > TitlePageTime)
+        if (_stateTime > TitlePageTimes[_titlePage])
         {
-            _titlePage = (_titlePage + 1) % 2;
+            _titlePage = (_titlePage + 1) % TitlePages;
             _stateTime = 0.4f;
         }
     }
@@ -143,11 +165,29 @@ public class UltraGame : Game
         {
             if (_input.BackPressed)
             {
-                _paused = false;
-                _world.Abandon();
+                QuitGame();
+                return;
             }
-            else if (_input.AnyPressed)
+
+            if (_input.PausePressed || _input.ConfirmPressed)
+            {
                 _paused = false;
+                return;
+            }
+
+            foreach (var tap in _input.Taps)
+            {
+                var p = tap.ToPoint();
+                if (ResumeKey.Contains(p))
+                    _paused = false;
+                else if (OptionsKey.Contains(p))
+                    OpenOptions(true);
+                else if (QuitKey.Contains(p))
+                    QuitGame();
+                else
+                    continue;
+                break;
+            }
             return;
         }
 
@@ -163,6 +203,70 @@ public class UltraGame : Game
             EndGame();
     }
 
+    private void QuitGame()
+    {
+        _paused = false;
+        _world.Abandon();
+    }
+
+    private void OpenOptions(bool fromPause)
+    {
+        _optionsFromPause = fromPause;
+        SetState(State.Options);
+    }
+
+    private void CloseOptions()
+    {
+        if (_optionsFromPause)
+        {
+            _state = State.Playing;
+            _paused = true;
+        }
+        else
+            SetState(State.Title);
+    }
+
+    private void UpdateOptions()
+    {
+        if (_input.BackPressed || _input.NewKeys.Contains(Keys.Enter))
+        {
+            CloseOptions();
+            return;
+        }
+
+        if (_input.NewKeys.Contains(Keys.Left) || _input.NewKeys.Contains(Keys.OemMinus))
+            _settings.ChangeSensitivity(-1);
+        if (_input.NewKeys.Contains(Keys.Right) || _input.NewKeys.Contains(Keys.OemPlus))
+            _settings.ChangeSensitivity(1);
+        if (_input.NewKeys.Contains(Keys.I))
+            _settings.ToggleInvert();
+
+        if (_stateTime < 0.3f)
+            return;
+
+        foreach (var tap in _input.Taps)
+        {
+            var p = tap.ToPoint();
+            if (DoneKey.Contains(p))
+            {
+                CloseOptions();
+                return;
+            }
+
+            if (MinusKey.Contains(p))
+                _settings.ChangeSensitivity(-1);
+            else if (PlusKey.Contains(p))
+                _settings.ChangeSensitivity(1);
+            else if (InvertKey.Contains(p))
+                _settings.ToggleInvert();
+            else if (p.Y >= SliderY && p.Y < SliderY + SegmentH && p.X >= SliderX && p.X < SliderX + SegmentW * Settings.MaxSensitivity)
+            {
+                int level = (p.X - SliderX) / SegmentW + 1;
+                _settings.ChangeSensitivity(level - _settings.TiltSensitivity);
+            }
+        }
+    }
+
     private void EndGame()
     {
         _pendingRank = _scores.RankFor(_world.Score);
@@ -174,7 +278,7 @@ public class UltraGame : Game
         }
         else
         {
-            _titlePage = 1;
+            _titlePage = HallOfFamePage;
             SetState(State.Title);
         }
     }
@@ -248,7 +352,7 @@ public class UltraGame : Game
     private void FinishName()
     {
         _highlightRank = _scores.Insert(_name.ToString(), _world.Score, _world.Wave);
-        _titlePage = 1;
+        _titlePage = HallOfFamePage;
         SetState(State.Title);
     }
 
@@ -267,6 +371,7 @@ public class UltraGame : Game
             case State.Title: DrawTitle(); break;
             case State.Playing: DrawPlaying(); break;
             case State.EnterName: DrawEnterName(); break;
+            case State.Options: DrawOptions(); break;
         }
         batch.End();
 
@@ -277,6 +382,8 @@ public class UltraGame : Game
         batch.Draw(_screen, _layout.GameRect, Color.White);
         if (_state == State.Playing)
             DrawTouchControls();
+        else if (_state == State.Title)
+            DrawOptionsIcon();
         batch.End();
 
         base.Draw(gameTime);
@@ -312,28 +419,11 @@ public class UltraGame : Game
         var r = _renderer;
         DrawLogo(6);
 
-        if (_titlePage == 0)
+        switch (_titlePage)
         {
-            r.TextCentered("SCORE ADVANCE TABLE", 34, Palette.Cyan);
-            for (int i = 0; i < SpriteArt.AlienTypes; i++)
-            {
-                int col = i / 8, row = i % 8;
-                float x = 14 + col * 116, y = 52 + row * 16;
-                r.Sprite(r.Art.Alien[i, (int)(_clock * 3f + i) % 2], x + 6, y + 3, World.WaveColors[i]);
-                r.Text($"{i + 1,2} {World.PointsFor(i, 0),3} PTS", x + 18, y, Palette.White);
-            }
-            r.TextCentered("DIVING ALIENS SCORE DOUBLE", 182, Palette.Green);
-        }
-        else
-        {
-            r.TextCentered("HALL OF FAME", 34, Palette.Cyan);
-            for (int i = 0; i < _scores.Entries.Count; i++)
-            {
-                var e = _scores.Entries[i];
-                bool lit = i == _highlightRank && (int)(_clock * 4f) % 2 == 0;
-                var color = lit ? Palette.Red : i == 0 ? Palette.Yellow : i < 3 ? Palette.Green : Palette.White;
-                r.Text($"{i + 1,2}. {e.Name,-10} {e.Score:D6} W{e.Wave:D2}", 45, 52 + i * 13, color);
-            }
+            case HowToPlayPage: DrawHowToPlay(); break;
+            case ScoreTablePage: DrawScoreTable(); break;
+            default: DrawHallOfFame(); break;
         }
 
         if ((int)(_clock / 3f) % 2 == 0)
@@ -344,6 +434,63 @@ public class UltraGame : Game
             r.TextCentered("TOUCH TO PLAY", 210, Palette.Yellow);
     }
 
+    private void DrawHowToPlay()
+    {
+        var r = _renderer;
+        r.TextCentered("HOW TO PLAY", 34, Palette.Cyan);
+
+        string move = _input.HasTilt ? "TILT THE DEVICE TO STEER YOUR SHIP." : "USE THE ARROW BUTTONS TO MOVE.";
+        var lines = new (string Text, Color Color)[]
+        {
+            ("DESTROY 16 WAVES OF ALIENS - EACH", Palette.White),
+            ("WAVE ATTACKS IN ITS OWN WAY.", Palette.White),
+            ("", Palette.White),
+            (move, Palette.Green),
+            ("TAP ANYWHERE TO FIRE. HOLD YOUR", Palette.Green),
+            ("FINGER DOWN FOR RAPID FIRE.", Palette.Green),
+            ("", Palette.White),
+            ("WATCH THE HEAT GAUGE! IF THE GUN", Palette.Yellow),
+            ("OVERHEATS IT LOCKS UNTIL IT COOLS,", Palette.Yellow),
+            ("AND THE HEAT CARRIES ON INTO THE", Palette.Yellow),
+            ("NEXT WAVE.", Palette.Yellow),
+            ("", Palette.White),
+            ("DODGE THE BOMBS AND DIVING ALIENS.", Palette.Red),
+            ("EXTRA LIFE EVERY 10000 POINTS.", Palette.Magenta),
+        };
+
+        for (int i = 0; i < lines.Length; i++)
+            r.TextCentered(lines[i].Text, 50 + i * 10, lines[i].Color);
+    }
+
+    private void DrawScoreTable()
+    {
+        var r = _renderer;
+        r.TextCentered("POINTS PER ALIEN", 34, Palette.Cyan);
+        for (int i = 0; i < SpriteArt.AlienTypes; i++)
+        {
+            int col = i / 8, row = i % 8;
+            float x = 4 + col * 118, y = 50 + row * 16;
+            r.Sprite(r.Art.Alien[i, (int)(_clock * 3f + i) % 2], x + 6, y + 3, World.WaveColors[i]);
+            r.Text(World.WaveNames[i], x + 16, y, World.WaveColors[i]);
+            string pts = World.PointsFor(i, 0).ToString();
+            r.Text(pts, x + 112 - PixelFont.Measure(pts), y, Palette.White);
+        }
+        r.TextCentered("DIVING ALIENS SCORE DOUBLE", 180, Palette.Green);
+    }
+
+    private void DrawHallOfFame()
+    {
+        var r = _renderer;
+        r.TextCentered("HALL OF FAME", 34, Palette.Cyan);
+        for (int i = 0; i < _scores.Entries.Count; i++)
+        {
+            var e = _scores.Entries[i];
+            bool lit = i == _highlightRank && (int)(_clock * 4f) % 2 == 0;
+            var color = lit ? Palette.Red : i == 0 ? Palette.Yellow : i < 3 ? Palette.Green : Palette.White;
+            r.Text($"{i + 1,2}. {e.Name,-10} {e.Score:D6} W{e.Wave:D2}", 45, 52 + i * 13, color);
+        }
+    }
+
     private void DrawPlaying()
     {
         var r = _renderer;
@@ -351,11 +498,65 @@ public class UltraGame : Game
 
         if (_paused)
         {
-            r.Rect(40, 80, 160, 56, Palette.Black);
-            r.Frame(40, 80, 160, 56, Palette.Cyan);
-            r.TextCentered("PAUSED", 88, Palette.Yellow, 2f);
-            r.TextCentered("TOUCH TO CONTINUE", 110, Palette.White);
-            r.TextCentered("BACK TO QUIT", 122, Palette.Cyan);
+            r.Rect(50, 70, 140, 88, Palette.Black);
+            r.Frame(50, 70, 140, 88, Palette.Cyan);
+            r.TextCentered("PAUSED", 78, Palette.Yellow, 2f);
+            DrawKey(ResumeKey, "RESUME", Palette.Green);
+            DrawKey(OptionsKey, "OPTIONS", Palette.White);
+            DrawKey(QuitKey, "QUIT", Palette.Red);
+        }
+    }
+
+    private void DrawOptions()
+    {
+        var r = _renderer;
+        r.TextCentered("OPTIONS", 12, Palette.Yellow, 2f);
+
+        r.TextCentered("TILT SENSITIVITY", 48, Palette.Cyan);
+        DrawKey(MinusKey, "-", Palette.White);
+        DrawKey(PlusKey, "+", Palette.White);
+        for (int i = 0; i < Settings.MaxSensitivity; i++)
+        {
+            int x = SliderX + i * SegmentW;
+            bool on = i < _settings.TiltSensitivity;
+            var color = !on ? Palette.Blue : i < 4 ? Palette.Green : i < 7 ? Palette.Yellow : Palette.Red;
+            r.Rect(x + 1, SliderY + SegmentH - 4 - i * 1.5f, SegmentW - 3, 4 + i * 1.5f, color);
+        }
+        r.Text("LOW", SliderX, 88, Palette.White);
+        r.TextCentered(_settings.TiltSensitivity.ToString(), 88, Palette.Yellow);
+        r.Text("HIGH", SliderX + SegmentW * Settings.MaxSensitivity - PixelFont.Measure("HIGH"), 88, Palette.White);
+
+        r.Text("INVERT TILT", 30, 110, Palette.Cyan);
+        DrawKey(InvertKey, _settings.InvertTilt ? "ON" : "OFF", _settings.InvertTilt ? Palette.Green : Palette.White);
+
+        if (_input.HasTilt)
+        {
+            r.TextCentered("TILT TEST", 136, Palette.Cyan);
+            r.Frame(30, 150, 180, 12, Palette.Blue);
+            r.Rect(119, 151, 2, 10, Palette.Blue);
+            float x = 120 + Math.Clamp(_input.Move, -1f, 1f) * 84f;
+            r.Sprite(r.Art.Player, x, 156, Palette.Green);
+        }
+        else
+            r.TextCentered("NO MOTION SENSOR FOUND", 150, Palette.Red);
+
+        DrawKey(DoneKey, "DONE", Palette.Green);
+    }
+
+    private void DrawOptionsIcon()
+    {
+        // Three slider lines with knobs, in the top-left corner (same place as pause in game).
+        var zone = _layout.PauseButton;
+        int size = Math.Max(24, Math.Min(zone.Width, zone.Height) / 2);
+        int line = Math.Max(3, size / 10);
+        int knob = line * 3;
+        int left = zone.Center.X - size / 2;
+        for (int i = 0; i < 3; i++)
+        {
+            int y = zone.Center.Y - size / 2 + i * size / 2;
+            Fill(new Rectangle(left, y - line / 2, size, line), ButtonLit);
+            int kx = left + new[] { size / 4, size * 3 / 4, size / 2 }[i] - knob / 2;
+            Fill(new Rectangle(kx, y - knob / 2, knob, knob), Palette.White);
         }
     }
 
