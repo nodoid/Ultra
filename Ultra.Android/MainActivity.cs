@@ -29,17 +29,31 @@ public class MainActivity : AndroidGameActivity
 {
     private UltraGame _game;
     private View _view;
+    private AndroidTiltSensor _tilt;
 
     protected override void OnCreate(Bundle bundle)
     {
         base.OnCreate(bundle);
 
-        _game = new UltraGame();
+        _tilt = new AndroidTiltSensor(this);
+        _game = new UltraGame(_tilt);
         _view = _game.Services.GetService(typeof(View)) as View;
 
         SetContentView(_view);
         HideSystemUi();
         _game.Run();
+    }
+
+    protected override void OnResume()
+    {
+        base.OnResume();
+        _tilt?.Start();
+    }
+
+    protected override void OnPause()
+    {
+        _tilt?.Stop();
+        base.OnPause();
     }
 
     public override void OnWindowFocusChanged(bool hasFocus)

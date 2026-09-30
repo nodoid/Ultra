@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Xna.Framework;
@@ -7,12 +8,31 @@ using Microsoft.Xna.Framework.Input.Touch;
 namespace Ultra.Core;
 
 /// <summary>
-/// Merges multi-touch, hardware keyboard and game pad input into one per-frame snapshot.
+/// Merges tilt steering, multi-touch, hardware keyboard and game pad input into one
+/// per-frame snapshot. Tilting the device steers; touching anywhere fires.
 /// </summary>
 public sealed class InputManager
 {
+    private const float DeadZone = 0.04f;
+    private const float FullTilt = 0.30f;
+
+    private readonly ITiltSensor _tilt;
     private KeyboardState _prevKeys;
     private GamePadState _prevPad;
+    private float _smoothedTilt;
+
+    public InputManager(ITiltSensor tilt)
+    {
+        _tilt = tilt;
+    }
+
+    public bool HasTilt => _tilt?.IsAvailable == true;
+
+    /// <summary>Horizontal movement, -1 (full left) to 1 (full right).</summary>
+    public float Move { get; private set; }
+
+    /// <summary>Smoothed raw tilt in g, for the on-screen meter.</summary>
+    public float TiltValue => _smoothedTilt;
 
     public bool Left { get; private set; }
     public bool Right { get; private set; }
@@ -43,17 +63,17 @@ public sealed class InputManager
             var p = touch.Position.ToPoint();
             bool isNew = touch.State == TouchLocationState.Pressed;
 
-            if (layout.FireButton.Contains(p))
-            {
-                Fire = true;
-                FirePressed |= isNew;
-            }
+            if (layout.PauseButton.Contains(p))
+                PausePressed |= isNew;
             else if (layout.LeftButton.Contains(p))
                 Left = true;
             else if (layout.RightButton.Contains(p))
                 Right = true;
-            else if (layout.PauseButton.Contains(p))
-                PausePressed |= isNew;
+            else
+            {
+                Fire = true;
+                FirePressed |= isNew;
+            }
 
             if (isNew)
             {
@@ -81,6 +101,18 @@ public sealed class InputManager
         BackPressed = NewKeys.Contains(Keys.Escape) ||
                       (pad.Buttons.Back == ButtonState.Pressed && _prevPad.Buttons.Back == ButtonState.Released);
         AnyPressed |= NewKeys.Any() || FirePressed || ConfirmPressed;
+
+        // Digital controls win over tilt so a keyboard or pad always works.
+        if (Left || Right)
+            Move = (Left ? -1f : 0f) + (Right ? 1f : 0f);
+        else if (HasTilt)
+        {
+            _smoothedTilt += (_tilt.Tilt - _smoothedTilt) * 0.35f;
+            float magnitude = Math.Clamp((Math.Abs(_smoothedTilt) - DeadZone) / (FullTilt - DeadZone), 0f, 1f);
+            Move = Math.Sign(_smoothedTilt) * magnitude;
+        }
+        else
+            Move = 0f;
 
         _prevKeys = keys;
         _prevPad = pad;

@@ -29,7 +29,7 @@ public class UltraGame : Game
 
     private readonly GraphicsDeviceManager _graphics;
     private readonly ScreenLayout _layout = new();
-    private readonly InputManager _input = new();
+    private readonly InputManager _input;
     private readonly StringBuilder _name = new();
 
     private RenderTarget2D _screen;
@@ -46,8 +46,9 @@ public class UltraGame : Game
     private int _highlightRank = -1;
     private int _pendingRank;
 
-    public UltraGame()
+    public UltraGame(ITiltSensor tiltSensor = null)
     {
+        _input = new InputManager(tiltSensor);
         _graphics = new GraphicsDeviceManager(this)
         {
             IsFullScreen = true,
@@ -82,7 +83,7 @@ public class UltraGame : Game
         _stateTime += dt;
 
         var pp = GraphicsDevice.PresentationParameters;
-        _layout.Update(pp.BackBufferWidth, pp.BackBufferHeight);
+        _layout.Update(pp.BackBufferWidth, pp.BackBufferHeight, !_input.HasTilt);
         _input.Update(_layout);
 
         switch (_state)
@@ -335,7 +336,10 @@ public class UltraGame : Game
             }
         }
 
-        r.TextCentered("BY PAUL F. JOHNSON", 196, Palette.Magenta);
+        if ((int)(_clock / 3f) % 2 == 0)
+            r.TextCentered("BY PAUL F. JOHNSON", 196, Palette.Magenta);
+        else
+            r.TextCentered(_input.HasTilt ? "TILT TO MOVE - TAP TO FIRE" : "ARROWS TO MOVE - TAP TO FIRE", 196, Palette.Cyan);
         if ((int)(_clock * 2f) % 2 == 0)
             r.TextCentered("TOUCH TO PLAY", 210, Palette.Yellow);
     }
@@ -394,7 +398,6 @@ public class UltraGame : Game
     private void DrawTouchControls()
     {
         var batch = _renderer.Batch;
-        var art = _renderer.Art;
         int textScale = Math.Max(2, (int)_layout.Scale);
 
         // Pause
@@ -405,27 +408,38 @@ public class UltraGame : Game
         Fill(new Rectangle(pc.X - bar * 2, pc.Y - barH / 2, bar, barH), ButtonLit);
         Fill(new Rectangle(pc.X + bar, pc.Y - barH / 2, bar, barH), ButtonLit);
 
-        // Left / right
-        DrawArrow(_layout.LeftButton, true, _input.Left);
-        DrawArrow(_layout.RightButton, false, _input.Right);
+        if (_input.HasTilt)
+        {
+            // Spirit-level style tilt meter in the left margin.
+            var m = _layout.TiltMeter;
+            if (m.Width > 16)
+            {
+                Fill(m, ButtonColor);
+                Fill(new Rectangle(m.Center.X - 1, m.Y, 2, m.Height), ButtonLit);
+                float pos = Math.Clamp(_input.Move, -1f, 1f);
+                int knob = m.Height;
+                int kx = (int)(m.Center.X + pos * (m.Width - knob) / 2f - knob / 2f);
+                Fill(new Rectangle(kx, m.Y, knob, m.Height), Palette.Green);
+                const string tilt = "TILT";
+                _renderer.Font.Draw(batch, tilt,
+                    new Vector2(m.Center.X - PixelFont.Measure(tilt, textScale) / 2f, m.Y - textScale * 12), ButtonLit, textScale);
+            }
+        }
+        else
+        {
+            DrawArrow(_layout.LeftButton, true, _input.Left);
+            DrawArrow(_layout.RightButton, false, _input.Right);
+        }
 
-        // Fire
-        var fire = _layout.FireButton;
-        int d = (int)(Math.Min(fire.Width, fire.Height) * 0.7f);
-        var circle = new Rectangle(fire.Center.X - d / 2, fire.Center.Y - d / 2, d, d);
-        batch.Draw(art.Circle, circle, _input.Fire ? Palette.Red : new Color(140, 0, 0));
-        var inner = circle;
-        inner.Inflate(-d / 12, -d / 12);
-        batch.Draw(art.Circle, inner, _input.Fire ? new Color(255, 80, 80) : new Color(200, 0, 0));
-        const string label = "FIRE";
-        var size = new Vector2(PixelFont.Measure(label, textScale), PixelFont.CellHeight * textScale);
-        _renderer.Font.Draw(batch, label, circle.Center.ToVector2() - size / 2f, Palette.White, textScale);
-
-        if (_world != null && _world.Overheated && (int)(_clock * 6f) % 2 == 0)
+        // Overheat warning in the right margin.
+        int right = _layout.GameRect.Right;
+        int marginW = _layout.ScreenWidth - right;
+        if (_world != null && _world.Overheated && marginW > textScale * 30 && (int)(_clock * 6f) % 2 == 0)
         {
             const string hot = "HOT!";
-            var hs = new Vector2(PixelFont.Measure(hot, textScale), 0);
-            _renderer.Font.Draw(batch, hot, new Vector2(fire.Center.X - hs.X / 2f, circle.Bottom + textScale * 4), Palette.Yellow, textScale);
+            int hs = Math.Max(textScale, Math.Min(marginW / 30, textScale * 2));
+            float w = PixelFont.Measure(hot, hs);
+            _renderer.Font.Draw(batch, hot, new Vector2(right + (marginW - w) / 2f, _layout.ScreenHeight / 2f - hs * 4), Palette.Red, hs);
         }
     }
 

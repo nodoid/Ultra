@@ -43,7 +43,7 @@ public sealed class World
 
     public const float PlayerY = 194f;
     private const float PlayTop = 18f;
-    private const float PlayerSpeed = 95f;
+    private const float PlayerSpeed = 110f;
     private const float ShotSpeed = 260f;
     private const float FireInterval = 0.11f;
     private const float HeatPerShot = 7.5f;
@@ -177,8 +177,7 @@ public sealed class World
         if (_invulnerable > 0f)
             _invulnerable -= dt;
 
-        float dir = (input.Left ? -1f : 0f) + (input.Right ? 1f : 0f);
-        _playerX = Math.Clamp(_playerX + dir * PlayerSpeed * dt, 10f, 230f);
+        _playerX = Math.Clamp(_playerX + input.Move * PlayerSpeed * dt, 10f, 230f);
 
         _fireCooldown -= dt;
         if (Overheated)

@@ -14,7 +14,7 @@ internal class Program : UIApplicationDelegate
 
     internal static void RunGame()
     {
-        _game = new UltraGame();
+        _game = new UltraGame(new IosTiltSensor());
         _game.Run();
     }
 

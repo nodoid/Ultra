@@ -19,25 +19,21 @@ The Hall of Fame keeps the top 10 scores. If you make the table, you enter your 
 
 ### Controls
 
-The game is locked to landscape. The Oric screen sits in the centre, with touch controls on either side:
+The game is locked to landscape.
 
-| Area | Action |
-| --- | --- |
-| Left panel, left half | Move left |
-| Left panel, right half | Move right |
-| Left panel, top | Pause |
-| Right panel | Fire (hold for rapid fire) |
-| Back button (Android) | Pause. Press again while paused to quit the game |
+- **Move:** tilt the device like a steering wheel. Lower the right edge to go right and the left edge to go left. The further you tilt, the faster the ship moves. A tilt meter sits in the left margin.
+- **Fire:** tap anywhere on the screen. Hold your finger down for rapid fire, but watch the heat gauge.
+- **Pause:** the pause icon in the top-left corner, or the Back button on Android. Press Back again while paused to quit the game.
 
-Hardware keyboards and game pads also work: arrow keys, Space or Ctrl to fire, P to pause, Esc to go back.
+Tilt uses the gyroscope-fused gravity vector: CoreMotion device motion on iOS and the `TYPE_GRAVITY` sensor on Android. On Android devices without a gyroscope it falls back to a filtered accelerometer. If the device has no motion sensor at all (for example the iOS Simulator), on-screen left and right buttons appear in the left margin instead. Hardware keyboards and game pads also work: arrow keys, Space or Ctrl to fire, P to pause, Esc to go back.
 
 ## Project layout
 
 | Project | Purpose |
 | --- | --- |
 | `Ultra.Core` | All game code (net10.0, MonoGame 3.8.5). It needs no content pipeline because graphics, font and sound are generated in code. |
-| `Ultra.Android` | Android host activity: fixed `SensorLandscape`, immersive full screen, adaptive icon, splash theme |
-| `Ultra.iOS` | iOS host: landscape only, app icon set, `LaunchScreen.storyboard` splash |
+| `Ultra.Android` | Android host activity: fixed `SensorLandscape`, immersive full screen, adaptive icon, splash theme, tilt sensor |
+| `Ultra.iOS` | iOS host: landscape only, app icon set, `LaunchScreen.storyboard` splash, CoreMotion tilt sensor |
 | `tools/generate_art.py` | Regenerates every icon and splash image from the game's own sprite and font data (requires Pillow) |
 
 ## Building
