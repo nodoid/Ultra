@@ -408,10 +408,8 @@ public class UltraGame : Game
         for (int i = 0; i < 5; i++)
             r.Sprite(r.Art.Alien[i * 3, (int)(_clock * 4f) % 2], 48 + i * 36, 120, World.WaveColors[i * 3] * fade);
 
-        r.TextCentered("WRITTEN BY", 148, Palette.Cyan * fade);
-        r.TextCentered("PAUL F. JOHNSON", 160, Palette.White * fade, 1f);
-        r.TextCentered("AFTER THE ORIC CLASSIC", 184, Palette.Yellow * fade);
-        r.TextCentered("PUBLISHED BY PSS IN 1983", 194, Palette.Yellow * fade);
+        r.TextCentered("BY PFJ", 150, Palette.White * fade, 2f);
+        r.TextCentered("BASED ON THE PSS ORIC GAME", 180, Palette.Yellow * fade);
     }
 
     private void DrawTitle()
@@ -427,7 +425,7 @@ public class UltraGame : Game
         }
 
         if ((int)(_clock / 3f) % 2 == 0)
-            r.TextCentered("BY PAUL F. JOHNSON", 196, Palette.Magenta);
+            r.TextCentered("BY PFJ - BASED ON THE PSS ORIC GAME", 196, Palette.Magenta);
         else
             r.TextCentered(_input.HasTilt ? "TILT TO MOVE - TAP TO FIRE" : "ARROWS TO MOVE - TAP TO FIRE", 196, Palette.Cyan);
         if ((int)(_clock * 2f) % 2 == 0)

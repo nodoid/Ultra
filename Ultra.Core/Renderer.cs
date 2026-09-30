@@ -40,9 +40,9 @@ public sealed class Renderer
         Text(text, centreX - PixelFont.Measure(text, scale) / 2f, y, color, scale);
 
     /// <summary>Draws a sprite centred on (cx, cy), snapped to whole virtual pixels.</summary>
-    public void Sprite(Texture2D texture, float cx, float cy, Color color)
+    public void Sprite(Texture2D texture, float cx, float cy, Color color, float scale = 1f)
     {
-        var pos = new Vector2((int)(cx - texture.Width / 2f), (int)(cy - texture.Height / 2f));
-        Batch.Draw(texture, pos, color);
+        var pos = new Vector2((int)(cx - texture.Width * scale / 2f), (int)(cy - texture.Height * scale / 2f));
+        Batch.Draw(texture, pos, null, color, 0f, Vector2.Zero, scale, SpriteEffects.None, 0f);
     }
 }

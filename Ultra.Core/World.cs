@@ -43,6 +43,12 @@ public sealed class World
 
     public const float PlayerY = 194f;
     private const float PlayTop = 18f;
+
+    // All in-game sprites are drawn at double size; these are the matching half-extents.
+    public const float SpriteScale = 2f;
+    private const float AlienHalfW = 12f, AlienHalfH = 8f;
+    private const float MinX = 14f, MaxX = 226f;    // alien centre limits
+    private const float LowestY = 160f;              // lowest alien centre for roaming waves
     private const float PlayerSpeed = 110f;
     private const float ShotSpeed = 260f;
     private const float FireInterval = 0.11f;
@@ -177,7 +183,7 @@ public sealed class World
         if (_invulnerable > 0f)
             _invulnerable -= dt;
 
-        _playerX = Math.Clamp(_playerX + input.Move * PlayerSpeed * dt, 10f, 230f);
+        _playerX = Math.Clamp(_playerX + input.Move * PlayerSpeed * dt, 16f, 224f);
 
         _fireCooldown -= dt;
         if (Overheated)
@@ -191,7 +197,7 @@ public sealed class World
             Heat -= Cooling * dt;
             if (input.Fire && _fireCooldown <= 0f && _shots.Count < 8)
             {
-                _shots.Add(new Projectile { X = _playerX, Y = PlayerY - 8 });
+                _shots.Add(new Projectile { X = _playerX, Y = PlayerY - 16 });
                 _fireCooldown = FireInterval;
                 Heat += HeatPerShot;
                 _sfx.Shoot();
@@ -217,7 +223,7 @@ public sealed class World
     {
         foreach (var b in _bombs)
             b.Y += b.VY * dt;
-        _bombs.RemoveAll(b => b.Y > 210);
+        _bombs.RemoveAll(b => b.Y > 212);
 
         if (!spawn)
             return;
@@ -234,7 +240,7 @@ public sealed class World
         if (_bombs.Count >= 3 + Wave / 4)
             return;
 
-        var candidates = _aliens.Where(a => a.Alive && a.Visible && a.Y > PlayTop + 2 && a.Y < 170 && a.X > 4 && a.X < 236).ToList();
+        var candidates = _aliens.Where(a => a.Alive && a.Visible && a.Y > PlayTop + 8 && a.Y < LowestY + 4 && a.X > 8 && a.X < 232).ToList();
         if (candidates.Count == 0)
             return;
 
@@ -242,7 +248,7 @@ public sealed class World
             ? candidates.OrderBy(a => Math.Abs(a.X - _playerX)).First()
             : candidates[_rng.Next(candidates.Count)];
 
-        _bombs.Add(new Projectile { X = shooter.X, Y = shooter.Y + 5, VY = (75f + Pattern * 3f) * Mult });
+        _bombs.Add(new Projectile { X = shooter.X, Y = shooter.Y + 12, VY = (75f + Pattern * 3f) * Mult });
     }
 
     private void CheckCollisions()
@@ -253,7 +259,7 @@ public sealed class World
             {
                 if (!a.Alive || !a.Visible)
                     continue;
-                if (Math.Abs(s.X - a.X) <= 6f && s.Y <= a.Y + 4f && s.Y + 4f >= a.Y - 4f)
+                if (Math.Abs(s.X - a.X) <= AlienHalfW && s.Y <= a.Y + AlienHalfH && s.Y + 8f >= a.Y - AlienHalfH)
                 {
                     KillAlien(a, true);
                     s.Y = -100f;
@@ -268,7 +274,7 @@ public sealed class World
 
         foreach (var b in _bombs)
         {
-            if (Math.Abs(b.X - _playerX) <= 6f && b.Y + 2f >= PlayerY - 3f && b.Y - 2f <= PlayerY + 4f)
+            if (Math.Abs(b.X - _playerX) <= 12f && b.Y + 5f >= PlayerY - 6f && b.Y - 5f <= PlayerY + 8f)
             {
                 KillPlayer();
                 return;
@@ -277,7 +283,7 @@ public sealed class World
 
         foreach (var a in _aliens)
         {
-            if (a.Alive && a.Visible && Math.Abs(a.X - _playerX) < 11f && Math.Abs(a.Y - PlayerY) < 8f)
+            if (a.Alive && a.Visible && Math.Abs(a.X - _playerX) < 22f && Math.Abs(a.Y - PlayerY) < 16f)
             {
                 KillAlien(a, false);
                 KillPlayer();
@@ -291,7 +297,7 @@ public sealed class World
         a.Alive = false;
         var color = WaveColors[Pattern];
         _booms.Add(new Boom { X = a.X, Y = a.Y, Color = color });
-        Burst(a.X, a.Y, 10, color, 50f);
+        Burst(a.X, a.Y, 14, color, 70f);
         _sfx.AlienExplode();
 
         if (!award)
@@ -315,8 +321,8 @@ public sealed class World
         _playerAlive = false;
         _phase = Phase.Dying;
         _phaseTimer = 2.2f;
-        Burst(_playerX, PlayerY, 40, Palette.Green, 90f);
-        Burst(_playerX, PlayerY, 25, Palette.Yellow, 60f);
+        Burst(_playerX, PlayerY, 40, Palette.Green, 120f);
+        Burst(_playerX, PlayerY, 25, Palette.Yellow, 80f);
         _booms.Add(new Boom { X = _playerX, Y = PlayerY, Color = Palette.White });
         _sfx.PlayerExplode();
     }
@@ -341,7 +347,7 @@ public sealed class World
         foreach (var a in _aliens.Where(a => a.State is AlienState.Diving or AlienState.Charging))
         {
             a.State = AlienState.Returning;
-            a.Y = -8f;
+            a.Y = -16f;
         }
         _phase = Phase.Play;
     }
@@ -409,13 +415,13 @@ public sealed class World
         switch (Pattern)
         {
             case 0: Grid(4, 6); break;
-            case 1: Grid(3, 7); break;
-            case 2: Grid(3, 7); break;
+            case 1: Grid(3, 6); break;
+            case 2: Grid(3, 6); break;
             case 3:
-                for (int i = 0; i < 14; i++)
+                for (int i = 0; i < 10; i++)
                 {
                     float ang = (float)(_rng.NextDouble() * Math.PI * 2);
-                    var a = Add(20 + _rng.Next(200), 24 + _rng.Next(100));
+                    var a = Add(30 + _rng.Next(180), 34 + _rng.Next(90));
                     a.VX = MathF.Cos(ang) * 55f * m;
                     a.VY = MathF.Sin(ang) * 55f * m;
                     if (Math.Abs(a.VY) < 15f)
@@ -423,45 +429,45 @@ public sealed class World
                 }
                 break;
             case 4:
-                for (int i = 0; i < 16; i++)
+                for (int i = 0; i < 12; i++)
                     Add(0, 0).Group = i / 4;
                 break;
             case 5:
-                for (int i = 0; i < 18; i++)
-                    Add(20 + i % 6 * 40, 20 + i / 6 * 24).VX = (i / 6 % 2 == 0 ? 1f : -1f) * 50f * m;
+                for (int i = 0; i < 12; i++)
+                    Add(30 + i % 4 * 60, 30 + i / 4 * 30).VX = (i / 4 % 2 == 0 ? 1f : -1f) * 50f * m;
                 break;
             case 6:
-                for (int i = 0; i < 16; i++)
+                for (int i = 0; i < 12; i++)
                     Add(0, 0);
                 break;
             case 7: Grid(3, 6); break;
             case 8:
-                for (int i = 0; i < 20; i++)
+                for (int i = 0; i < 16; i++)
                 {
-                    int chain = i / 10, k = i % 10;
-                    var a = chain == 0 ? Add(-8 - k * 13, 24) : Add(248 + k * 13, 48);
+                    int chain = i / 8, k = i % 8;
+                    var a = chain == 0 ? Add(-14 - k * 24, 30) : Add(254 + k * 24, 58);
                     a.VX = (chain == 0 ? 70f : -70f) * m;
                     a.Group = chain;
                 }
                 break;
             case 9:
-                for (int i = 0; i < 16; i++)
+                for (int i = 0; i < 12; i++)
                     Add(0, 0);
                 break;
             case 10:
-                for (int i = 0; i < 16; i++)
-                    Add(12 + _rng.Next(216), -10 - _rng.Next(180)).VY = (30f + _rng.Next(30)) * m;
+                for (int i = 0; i < 12; i++)
+                    Add(16 + _rng.Next(208), -14 - _rng.Next(180)).VY = (30f + _rng.Next(30)) * m;
                 break;
-            case 11: Grid(3, 6, 34f, 14f, 0f); break;
+            case 11: Grid(3, 5, 40f, 0f, 0f); break;
             case 12:
-                for (int i = 0; i < 16; i++)
-                    Add(12 + _rng.Next(216), 26 + _rng.Next(124)).T = 0.5f + (float)_rng.NextDouble() * 2f;
+                for (int i = 0; i < 12; i++)
+                    Add(16 + _rng.Next(208), 34 + _rng.Next(116)).T = 0.5f + (float)_rng.NextDouble() * 2f;
                 break;
             case 13:
-                for (int i = 0; i < 18; i++)
+                for (int i = 0; i < 14; i++)
                 {
-                    int band = i / 9, k = i % 9;
-                    Add(k * 30 + band * 15, 0).Group = band;
+                    int band = i / 7, k = i % 7;
+                    Add(k * 40 + band * 20, 0).Group = band;
                 }
                 break;
             case 14: Grid(3, 6); break;
@@ -481,7 +487,7 @@ public sealed class World
         return a;
     }
 
-    private void Grid(int rows, int cols, float sx = 18f, float sy = 14f, float top = 30f)
+    private void Grid(int rows, int cols, float sx = 30f, float sy = 22f, float top = 34f)
     {
         for (int r = 0; r < rows; r++)
             for (int c = 0; c < cols; c++)
@@ -506,13 +512,13 @@ public sealed class World
             case 1:
                 foreach (var a in _aliens)
                 {
-                    a.X = a.HomeX + MathF.Sin(t * 1.6f * m + a.Row * 0.9f) * 34f;
-                    a.Y = a.HomeY + 16f + MathF.Sin(t * 0.6f) * 18f;
+                    a.X = a.HomeX + MathF.Sin(t * 1.6f * m + a.Row * 0.9f) * 28f;
+                    a.Y = a.HomeY + 14f + MathF.Sin(t * 0.6f) * 16f;
                 }
                 break;
 
             case 2:
-                Swoopers(dt, m, 1, 1.8f, 0.5f, 20f);
+                Swoopers(dt, m, 1, 1.8f, 0.5f, 18f);
                 break;
 
             case 3:
@@ -520,10 +526,10 @@ public sealed class World
                 {
                     a.X += a.VX * dt;
                     a.Y += a.VY * dt;
-                    if (a.X < 8f) a.VX = Math.Abs(a.VX);
-                    if (a.X > 232f) a.VX = -Math.Abs(a.VX);
-                    if (a.Y < 22f) a.VY = Math.Abs(a.VY);
-                    if (a.Y > 170f) a.VY = -Math.Abs(a.VY);
+                    if (a.X < MinX) a.VX = Math.Abs(a.VX);
+                    if (a.X > MaxX) a.VX = -Math.Abs(a.VX);
+                    if (a.Y < 30f) a.VY = Math.Abs(a.VY);
+                    if (a.Y > LowestY) a.VY = -Math.Abs(a.VY);
                 }
                 break;
 
@@ -531,11 +537,11 @@ public sealed class World
                 foreach (var a in _aliens)
                 {
                     int g = a.Group, k = a.Index % 4;
-                    float cx = 40f + g * 53f + MathF.Sin(t * 0.7f * m + g) * 20f;
-                    float cy = 70f + MathF.Sin(t * 0.9f * m + g * 1.3f) * 30f;
+                    float cx = 50f + g * 70f + MathF.Sin(t * 0.7f * m + g) * 12f;
+                    float cy = 76f + MathF.Sin(t * 0.9f * m + g * 1.3f) * 26f;
                     float ang = t * 2.2f * m * (g % 2 == 0 ? 1f : -1f) + k * MathF.PI / 2f;
-                    a.X = cx + MathF.Cos(ang) * 16f;
-                    a.Y = cy + MathF.Sin(ang) * 16f;
+                    a.X = cx + MathF.Cos(ang) * 24f;
+                    a.Y = cy + MathF.Sin(ang) * 24f;
                 }
                 break;
 
@@ -543,19 +549,19 @@ public sealed class World
                 foreach (var a in _aliens)
                 {
                     a.X += a.VX * dt;
-                    if (a.X < 8f) a.VX = Math.Abs(a.VX);
-                    if (a.X > 232f) a.VX = -Math.Abs(a.VX);
+                    if (a.X < MinX) a.VX = Math.Abs(a.VX);
+                    if (a.X > MaxX) a.VX = -Math.Abs(a.VX);
                     a.Y += 12f * m * dt;
-                    if (a.Y > 172f) a.Y = 20f;
+                    if (a.Y > LowestY) a.Y = 30f;
                 }
                 break;
 
             case 6:
                 foreach (var a in _aliens)
                 {
-                    float th = t * 0.75f * m - a.Index * 0.3f;
-                    a.X = 120f + 104f * MathF.Sin(th);
-                    a.Y = 95f + 55f * MathF.Sin(2f * th);
+                    float th = t * 0.75f * m - a.Index * 0.42f;
+                    a.X = 120f + 96f * MathF.Sin(th);
+                    a.Y = 95f + 50f * MathF.Sin(2f * th);
                 }
                 break;
 
@@ -567,24 +573,24 @@ public sealed class World
                 foreach (var a in _aliens)
                 {
                     a.X += a.VX * dt;
-                    if (!a.Entered && a.X >= 8f && a.X <= 232f)
+                    if (!a.Entered && a.X >= MinX && a.X <= MaxX)
                         a.Entered = true;
                     if (a.Entered)
                     {
-                        if (a.X > 232f && a.VX > 0f) { a.X = 232f; a.VX = -a.VX; a.Y += 12f; }
-                        if (a.X < 8f && a.VX < 0f) { a.X = 8f; a.VX = -a.VX; a.Y += 12f; }
+                        if (a.X > MaxX && a.VX > 0f) { a.X = MaxX; a.VX = -a.VX; a.Y += 20f; }
+                        if (a.X < MinX && a.VX < 0f) { a.X = MinX; a.VX = -a.VX; a.Y += 20f; }
                     }
-                    if (a.Y > 172f) a.Y = 24f;
+                    if (a.Y > LowestY) a.Y = 30f;
                 }
                 break;
 
             case 9:
                 foreach (var a in _aliens)
                 {
-                    float th = t * 1.3f * m + a.Index * MathF.PI * 2f / 16f;
-                    float r = 25f + 55f * (0.5f + 0.5f * MathF.Sin(t * 0.8f));
-                    a.X = 120f + r * MathF.Cos(th) * 1.4f;
-                    a.Y = 95f + r * MathF.Sin(th) * 0.9f;
+                    float th = t * 1.3f * m + a.Index * MathF.PI * 2f / 12f;
+                    float r = 30f + 45f * (0.5f + 0.5f * MathF.Sin(t * 0.8f));
+                    a.X = 120f + r * MathF.Cos(th) * 1.3f;
+                    a.Y = 90f + r * MathF.Sin(th) * 0.85f;
                 }
                 break;
 
@@ -593,10 +599,10 @@ public sealed class World
                 {
                     a.Y += a.VY * dt;
                     a.X += MathF.Sin(t * 2f + a.Index) * 15f * dt;
-                    if (a.Y > 176f)
+                    if (a.Y > LowestY)
                     {
-                        a.Y = -10f - _rng.Next(40);
-                        a.X = 12 + _rng.Next(216);
+                        a.Y = -14f - _rng.Next(40);
+                        a.X = 16 + _rng.Next(208);
                     }
                 }
                 break;
@@ -604,8 +610,8 @@ public sealed class World
             case 11:
                 foreach (var a in _aliens)
                 {
-                    float len = 36f + a.Row * 16f;
-                    float ang = 0.45f * MathF.Sin(t * 1.4f * m + a.Col * 0.45f);
+                    float len = 40f + a.Row * 26f;
+                    float ang = 0.28f * MathF.Sin(t * 1.4f * m + a.Col * 0.45f);
                     a.X = a.HomeX + len * MathF.Sin(ang);
                     a.Y = 8f + len * MathF.Cos(ang);
                 }
@@ -618,8 +624,8 @@ public sealed class World
                     a.Visible = a.T >= 0.45f || (int)(a.T * 20f) % 2 == 0;
                     if (a.T <= 0f)
                     {
-                        a.X = 12 + _rng.Next(216);
-                        a.Y = 26 + _rng.Next(124);
+                        a.X = 16 + _rng.Next(208);
+                        a.Y = 34 + _rng.Next(116);
                         a.T = (1.2f + (float)_rng.NextDouble() * 1.8f) / m;
                         a.Visible = true;
                     }
@@ -630,16 +636,16 @@ public sealed class World
                 foreach (var a in _aliens)
                 {
                     a.X += (a.Group == 0 ? 1f : -1f) * 55f * m * dt;
-                    if (a.X > 255f) a.X -= 270f;
-                    if (a.X < -15f) a.X += 270f;
-                    float band = a.Group == 0 ? 45f + MathF.Sin(t * 0.4f) * 22f : 100f + MathF.Sin(t * 0.4f + MathF.PI) * 22f;
+                    if (a.X > 260f) a.X -= 280f;
+                    if (a.X < -20f) a.X += 280f;
+                    float band = a.Group == 0 ? 48f + MathF.Sin(t * 0.4f) * 20f : 104f + MathF.Sin(t * 0.4f + MathF.PI) * 20f;
                     a.Y = band + MathF.Sin(t * 3f + a.Index) * 4f;
                 }
                 break;
 
             case 14:
             {
-                float target = Math.Clamp(_playerX - 120f, -60f, 60f);
+                float target = Math.Clamp(_playerX - 120f, -28f, 28f);
                 float step = 35f * m * dt;
                 _groupX += Math.Clamp(target - _groupX, -step, step);
                 _groupY = 20f + MathF.Sin(t * 0.5f) * 20f;
@@ -668,15 +674,15 @@ public sealed class World
 
         float minX = alive.Min(a => a.HomeX) + _groupX;
         float maxX = alive.Max(a => a.HomeX) + _groupX;
-        if (minX < 10f && _groupDir < 0f)
+        if (minX < MinX && _groupDir < 0f)
         {
             _groupDir = 1f;
-            _groupY += 6f;
+            _groupY += 8f;
         }
-        else if (maxX > 230f && _groupDir > 0f)
+        else if (maxX > MaxX && _groupDir > 0f)
         {
             _groupDir = -1f;
-            _groupY += 6f;
+            _groupY += 8f;
         }
 
         foreach (var a in _aliens)
@@ -695,7 +701,7 @@ public sealed class World
             }
         }
 
-        if (_playerAlive && alive.Max(a => a.Y) >= PlayerY - 12f)
+        if (_playerAlive && alive.Max(a => a.Y) >= PlayerY - 24f)
         {
             _groupY = 0f;
             KillPlayer();
@@ -718,7 +724,7 @@ public sealed class World
                 {
                     var d = ready[_rng.Next(ready.Count)];
                     d.State = AlienState.Diving;
-                    d.VX = d.X < 120f ? -40f : 40f;
+                    d.VX = d.X < 120f ? -50f : 50f;
                     d.VY = -50f;
                 }
             }
@@ -741,9 +747,9 @@ public sealed class World
                     a.VX = Math.Clamp(a.VX + Math.Sign(_playerX - a.X) * 120f * dt, -80f, 80f);
                     a.X += a.VX * dt;
                     a.Y += a.VY * dt;
-                    if (a.Y > 216f)
+                    if (a.Y > 230f)
                     {
-                        a.Y = -8f;
+                        a.Y = -16f;
                         a.State = AlienState.Returning;
                     }
                     break;
@@ -807,10 +813,10 @@ public sealed class World
                 case AlienState.Diving:
                     a.X += a.VX * dt;
                     a.Y += a.VY * dt;
-                    if (a.Y > 216f || a.X < -12f || a.X > 252f)
+                    if (a.Y > 230f || a.X < -24f || a.X > 264f)
                     {
                         a.X = a.HomeX + _groupX;
-                        a.Y = -8f;
+                        a.Y = -16f;
                         a.State = AlienState.Returning;
                     }
                     break;
@@ -857,27 +863,27 @@ public sealed class World
         var alienColor = WaveColors[Pattern];
         foreach (var a in _aliens)
         {
-            if (!a.Alive || !a.Visible || a.Y < PlayTop - 4)
+            if (!a.Alive || !a.Visible || a.Y < PlayTop + 6)
                 continue;
             int frame = (int)((_clock + a.Index * 0.1f) * 4f) % 2;
-            r.Sprite(art.Alien[Pattern, frame], a.X, a.Y, alienColor);
+            r.Sprite(art.Alien[Pattern, frame], a.X, a.Y, alienColor, SpriteScale);
         }
 
         foreach (var b in _booms)
-            r.Sprite(art.Explosion[b.T < 0.15f ? 0 : 1], b.X, b.Y, b.Color);
+            r.Sprite(art.Explosion[b.T < 0.15f ? 0 : 1], b.X, b.Y, b.Color, SpriteScale);
 
         foreach (var s in _shots)
-            r.Rect((int)s.X, (int)s.Y, 1, 4, Palette.Yellow);
+            r.Rect((int)s.X - 1, (int)s.Y, 2, 8, Palette.Yellow);
 
         int bombFrame = (int)(_clock * 8f) % 2;
         foreach (var b in _bombs)
-            r.Sprite(art.Bomb[bombFrame], b.X, b.Y, bombFrame == 0 ? Palette.Red : Palette.White);
+            r.Sprite(art.Bomb[bombFrame], b.X, b.Y, bombFrame == 0 ? Palette.Red : Palette.White, SpriteScale);
 
         if (_playerAlive && (_invulnerable <= 0f || (int)(_invulnerable * 10f) % 2 == 0))
-            r.Sprite(art.Player, _playerX, PlayerY, Palette.Green);
+            r.Sprite(art.Player, _playerX, PlayerY, Palette.Green, SpriteScale);
 
         foreach (var p in _particles)
-            r.Rect((int)p.X, (int)p.Y, 1, 1, p.Color);
+            r.Rect((int)p.X, (int)p.Y, 2, 2, p.Color);
 
         DrawHud(r, highScore);
 
@@ -885,9 +891,9 @@ public sealed class World
         switch (_phase)
         {
             case Phase.Intro:
-                r.TextCentered($"WAVE {Wave:D2}", 92, flash ? Palette.White : Palette.Yellow, 2f);
-                r.TextCentered(WaveNames[Pattern], 114, alienColor);
-                r.TextCentered($"{PointsFor(Pattern, Cycle)} PTS EACH", 126, Palette.Cyan);
+                r.TextCentered($"WAVE {Wave:D2}", 122, flash ? Palette.White : Palette.Yellow, 2f);
+                r.TextCentered(WaveNames[Pattern], 144, alienColor);
+                r.TextCentered($"{PointsFor(Pattern, Cycle)} PTS EACH", 156, Palette.Cyan);
                 break;
             case Phase.Clear:
                 r.TextCentered("WAVE CLEARED", 100, flash ? Palette.Green : Palette.White);

@@ -150,9 +150,8 @@ def make_splash(w, h):
         draw_rows(img, ALIENS[k], x, int(380 * u), s_alien, WAVE_COLOURS[k])
     s_ship = max(1, int(9 * u))
     draw_rows(img, PLAYER, (w - 15 * s_ship) // 2, int(560 * u), s_ship, GREEN)
-    draw_centred_text(img, "WRITTEN BY", int(730 * u), max(1, int(4 * u)), CYAN)
-    draw_centred_text(img, "PAUL F. JOHNSON", int(790 * u), max(1, int(7 * u)), WHITE)
-    draw_centred_text(img, "AFTER THE PSS ORIC CLASSIC (1983)", int(930 * u), max(1, int(3 * u)), YELLOW)
+    draw_centred_text(img, "BY PFJ", int(740 * u), max(1, int(9 * u)), WHITE)
+    draw_centred_text(img, "BASED ON THE PSS ORIC GAME", int(900 * u), max(1, int(4 * u)), YELLOW)
     return img
 
 

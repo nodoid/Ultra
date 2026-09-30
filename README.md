@@ -11,7 +11,7 @@ Written by **Paul F. Johnson**.
 - **16 waves of aliens**, each with its own animated graphics and attack pattern: Marchers, Wavers, Swoopers, Bouncers, Orbiters, Zigzaggers, Loopers, Kamikazes, Centipedes, Spirallers, Raindrops, Pendulums, Phantoms, Crossfire, Hunters and the Ultra. After wave 16 the cycle repeats, faster and for more points.
 - **Gun overheating.** The machine gun heats up with every shot. If it reaches the limit it locks until it has cooled. The temperature carries over from one wave to the next, so you start each wave with the gun as hot as you left it.
 - Aliens score 10 points on wave 1, rising by 5 per wave to 85 for the Ultra on wave 16. Diving aliens score double. You get an extra life every 10,000 points.
-- Oric-style presentation: a 240x224 screen, the eight Oric colours, a 6x8 character-cell font, and AY-style square-wave and noise sound effects synthesised at runtime.
+- Oric-style presentation: a 240x224 screen with the in-game sprites drawn at double size (chunky Oric pixels), the eight Oric colours, a 6x8 character-cell font, and AY-style square-wave and noise sound effects synthesised at runtime.
 
 ### High scores
 
