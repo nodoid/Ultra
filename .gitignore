@@ -7,3 +7,18 @@ obj/
 .DS_Store
 *.DotSettings.user
 release/
+
+# Signing keys and credentials (never commit)
+keys/
+*.jks
+*.keystore
+*.p12
+*.pfx
+*.pem
+*.key
+*.cer
+*.mobileprovision
+*.provisionprofile
+*.p8
+.env
+*.env
