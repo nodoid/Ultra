@@ -5,8 +5,8 @@
     <SupportedOSPlatformVersion>23</SupportedOSPlatformVersion>
     <ApplicationId>uk.co.allthejohnsons.theultra</ApplicationId>
     <ApplicationTitle>The Ultra</ApplicationTitle>
-    <ApplicationVersion>1</ApplicationVersion>
-    <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
+    <ApplicationVersion>2</ApplicationVersion>
+    <ApplicationDisplayVersion>1.0.1</ApplicationDisplayVersion>
     <AssemblyName>Ultra</AssemblyName>
     <Authors>Paul F. Johnson</Authors>
     <Copyright>Copyright © 2026 Paul F. Johnson</Copyright>
