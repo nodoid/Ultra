@@ -8,8 +8,9 @@ using Microsoft.Xna.Framework.Input.Touch;
 namespace Ultra.Core;
 
 /// <summary>
-/// Merges tilt steering, multi-touch, hardware keyboard and game pad input into one
-/// per-frame snapshot. Tilting the device steers; touching anywhere fires.
+/// Merges tilt steering, multi-touch, mouse, keyboard and game pad input into one
+/// per-frame snapshot. On phones and tablets tilting the device steers and touching anywhere
+/// fires; on a desktop the ship follows the mouse and a click fires.
 /// </summary>
 public sealed class InputManager
 {
@@ -22,6 +23,9 @@ public sealed class InputManager
     private readonly Settings _settings;
     private KeyboardState _prevKeys;
     private GamePadState _prevPad;
+    private MouseState _prevMouse;
+    private (Vector2 Start, bool OnPause)? _mouseDown;
+    private bool _mouseSteering;
     private float _smoothedTilt;
 
     public InputManager(ITiltSensor tilt, Settings settings)
@@ -34,6 +38,12 @@ public sealed class InputManager
 
     /// <summary>Horizontal movement, -1 (full left) to 1 (full right).</summary>
     public float Move { get; private set; }
+
+    /// <summary>
+    /// Desktop: the virtual X position the ship should steer towards (the mouse pointer), or
+    /// null when the keys are steering.
+    /// </summary>
+    public float? PointerX { get; private set; }
 
     /// <summary>Smoothed raw tilt in g, for the on-screen meter.</summary>
     public float TiltValue => _smoothedTilt;
@@ -103,6 +113,9 @@ public sealed class InputManager
             }
         }
 
+        if (Platform.IsDesktop)
+            UpdateMouse(layout);
+
         var keys = Keyboard.GetState();
         foreach (var k in keys.GetPressedKeys())
             if (!_prevKeys.IsKeyDown(k))
@@ -110,8 +123,8 @@ public sealed class InputManager
 
         var pad = GamePad.GetState(PlayerIndex.One);
 
-        Left |= keys.IsKeyDown(Keys.Left) || pad.DPad.Left == ButtonState.Pressed || pad.ThumbSticks.Left.X < -0.4f;
-        Right |= keys.IsKeyDown(Keys.Right) || pad.DPad.Right == ButtonState.Pressed || pad.ThumbSticks.Left.X > 0.4f;
+        Left |= keys.IsKeyDown(Keys.Left) || keys.IsKeyDown(Keys.Z) || pad.DPad.Left == ButtonState.Pressed || pad.ThumbSticks.Left.X < -0.4f;
+        Right |= keys.IsKeyDown(Keys.Right) || keys.IsKeyDown(Keys.X) || pad.DPad.Right == ButtonState.Pressed || pad.ThumbSticks.Left.X > 0.4f;
         Fire |= keys.IsKeyDown(Keys.Space) || keys.IsKeyDown(Keys.LeftControl) || pad.Buttons.A == ButtonState.Pressed;
 
         bool keyFire = NewKeys.Contains(Keys.Space) || NewKeys.Contains(Keys.LeftControl) ||
@@ -125,7 +138,14 @@ public sealed class InputManager
                       (pad.Buttons.Back == ButtonState.Pressed && _prevPad.Buttons.Back == ButtonState.Released);
         AnyPressed |= NewKeys.Any() || keyFire || ConfirmPressed;
 
-        // Digital controls win over tilt so a keyboard or pad always works.
+        // Digital controls win over tilt and the mouse so a keyboard or pad always works.
+        // The mouse takes over again as soon as it moves.
+        if (Left || Right)
+            _mouseSteering = false;
+        PointerX = _mouseSteering && _settings.MouseSteering
+            ? layout.ToVirtual(new Vector2(_prevMouse.X, _prevMouse.Y)).X
+            : null;
+
         if (Left || Right)
             Move = (Left ? -1f : 0f) + (Right ? 1f : 0f);
         else if (HasTilt)
@@ -142,6 +162,48 @@ public sealed class InputManager
 
         _prevKeys = keys;
         _prevPad = pad;
+    }
+
+    /// <summary>
+    /// A left click acts like a touch: it fires (hold for rapid fire), presses on-screen buttons
+    /// and pauses from the top-left corner. Moving the mouse hands steering to the pointer.
+    /// </summary>
+    private void UpdateMouse(ScreenLayout layout)
+    {
+        var mouse = Mouse.GetState();
+        var pos = new Vector2(mouse.X, mouse.Y);
+        bool inWindow = mouse.X >= 0 && mouse.Y >= 0 && mouse.X < layout.ScreenWidth && mouse.Y < layout.ScreenHeight;
+        bool down = mouse.LeftButton == ButtonState.Pressed;
+        bool wasDown = _prevMouse.LeftButton == ButtonState.Pressed;
+
+        if (down && !wasDown && inWindow)
+        {
+            bool onPause = layout.PauseButton.Contains(mouse.Position);
+            _mouseDown = (pos, onPause);
+            AnyPressed = true;
+            Taps.Add(layout.ToVirtual(pos));
+            if (onPause)
+                PausePressed = true;
+            else
+                FirePressed = true;
+        }
+
+        if (_mouseDown is { } press)
+        {
+            if (down)
+                Fire |= !press.OnPause;
+            else
+            {
+                _mouseDown = null;
+                if (!press.OnPause && (pos - press.Start).Length() <= layout.ScreenWidth * TapSlopFraction)
+                    TapReleases.Add(layout.ToVirtual(pos));
+            }
+        }
+
+        if (inWindow && mouse.Position != _prevMouse.Position)
+            _mouseSteering = true;
+
+        _prevMouse = mouse;
     }
 
     private void TrackRelease(TouchLocation touch, ScreenLayout layout, long now)

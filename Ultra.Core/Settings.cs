@@ -20,6 +20,12 @@ public sealed class Settings
     public int TiltSensitivity { get; private set; } = DefaultSensitivity;
     public bool InvertTilt { get; private set; }
 
+    /// <summary>Desktop: the ship follows the mouse pointer.</summary>
+    public bool MouseSteering { get; private set; } = true;
+
+    /// <summary>Desktop: play full screen rather than in a window.</summary>
+    public bool FullScreen { get; private set; }
+
     public Settings()
     {
         Load();
@@ -46,6 +52,20 @@ public sealed class Settings
         Save();
     }
 
+    public void ToggleMouseSteering()
+    {
+        MouseSteering = !MouseSteering;
+        Save();
+    }
+
+    public void SetFullScreen(bool fullScreen)
+    {
+        if (fullScreen == FullScreen)
+            return;
+        FullScreen = fullScreen;
+        Save();
+    }
+
     private void Load()
     {
         try
@@ -65,6 +85,12 @@ public sealed class Settings
                     case "InvertTilt" when bool.TryParse(parts[1], out bool b):
                         InvertTilt = b;
                         break;
+                    case "MouseSteering" when bool.TryParse(parts[1], out bool m):
+                        MouseSteering = m;
+                        break;
+                    case "FullScreen" when bool.TryParse(parts[1], out bool f):
+                        FullScreen = f;
+                        break;
                 }
             }
         }
@@ -80,6 +106,8 @@ public sealed class Settings
         {
             $"TiltSensitivity={TiltSensitivity}",
             $"InvertTilt={InvertTilt}",
+            $"MouseSteering={MouseSteering}",
+            $"FullScreen={FullScreen}",
         });
     }
 }
@@ -92,6 +120,9 @@ public static class Storage
         string folder = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
         if (string.IsNullOrEmpty(folder))
             folder = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
+        // On a desktop the shared app data folder holds other programs' files too.
+        if (Platform.IsDesktop)
+            folder = Path.Combine(folder, "The Ultra");
         return Path.Combine(folder, fileName);
     }
 

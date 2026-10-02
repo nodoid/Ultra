@@ -43,6 +43,10 @@ public class UltraGame : Game
     private static readonly Rectangle InvertKey = new(150, 106, 60, 16);
     private static readonly Rectangle DoneKey = new(90, 190, 60, 16);
 
+    // Desktop options screen
+    private static readonly Rectangle MouseKey = new(160, 44, 60, 16);
+    private static readonly Rectangle FullScreenKey = new(160, 66, 60, 16);
+
     private static readonly Color PanelColor = new(6, 6, 22);
     private static readonly Color ButtonColor = new(40, 40, 140);
     private static readonly Color ButtonLit = new(90, 90, 255);
@@ -68,26 +72,110 @@ public class UltraGame : Game
     private int _pendingRank;
     private bool _optionsFromPause;
     private float _pageTime;
+    private bool _resizing;
+
+    /// <summary>
+    /// When set, the finished frame is drawn into this target instead of the window, at the
+    /// target's size. Used to capture store screenshots at any resolution.
+    /// </summary>
+    public RenderTarget2D OutputTarget { get; set; }
 
     public UltraGame(ITiltSensor tiltSensor = null)
     {
         _input = new InputManager(tiltSensor, _settings);
         _graphics = new GraphicsDeviceManager(this)
         {
-            IsFullScreen = true,
+            IsFullScreen = !Platform.IsDesktop,
             SupportedOrientations = DisplayOrientation.LandscapeLeft | DisplayOrientation.LandscapeRight,
             SynchronizeWithVerticalRetrace = true,
         };
         IsFixedTimeStep = false;
         IsMouseVisible = true;
-        Window.AllowUserResizing = false;
+        Window.AllowUserResizing = Platform.IsDesktop;
+        if (Platform.IsDesktop)
+        {
+            // Full screen uses a borderless window the size of the display, without a mode change.
+            _graphics.HardwareModeSwitch = false;
+            Window.Title = "The Ultra";
+            Window.ClientSizeChanged += OnClientSizeChanged;
+        }
     }
 
     protected override void Initialize()
     {
+        if (Platform.IsDesktop)
+            ApplyWindowMode(_settings.FullScreen);
         base.Initialize();
         _scores = new HighScoreTable();
         Deactivated += (_, _) => { if (_state == State.Playing) _paused = true; };
+    }
+
+    /// <summary>Starts a game on the given sheet that plays itself, for store screenshots.</summary>
+    public void StartDemo(int sheet)
+    {
+        _world = new World(_sfx, sheet) { Autopilot = true };
+        _paused = false;
+        SetState(State.Playing);
+    }
+
+    /// <summary>Shows one of the title pages and holds it there, for store screenshots.</summary>
+    public void ShowTitlePage(int page)
+    {
+        SetState(State.Title);
+        _titlePage = page;
+        _pageTime = -1000f;
+    }
+
+    // ------------------------------------------------------------------ desktop window
+
+    private void ApplyWindowMode(bool fullScreen)
+    {
+        _resizing = true;
+        var display = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode;
+        if (fullScreen)
+        {
+            _graphics.PreferredBackBufferWidth = display.Width;
+            _graphics.PreferredBackBufferHeight = display.Height;
+        }
+        else
+        {
+            // The largest whole-number scale of the Oric screen that fits, with side margins.
+            int scale = Math.Max(2, Math.Min((display.Height - 160) / Renderer.Height, (display.Width - 80) * 3 / (Renderer.Width * 4)));
+            _graphics.PreferredBackBufferHeight = Renderer.Height * scale;
+            _graphics.PreferredBackBufferWidth = Renderer.Width * scale * 4 / 3;
+        }
+        _graphics.IsFullScreen = fullScreen;
+        _graphics.ApplyChanges();
+        _resizing = false;
+        _settings.SetFullScreen(fullScreen);
+    }
+
+    private void OnClientSizeChanged(object sender, EventArgs e)
+    {
+        var size = Window.ClientBounds;
+        if (_resizing || _graphics.IsFullScreen || size.Width <= 0 || size.Height <= 0)
+            return;
+        if (size.Width == _graphics.PreferredBackBufferWidth && size.Height == _graphics.PreferredBackBufferHeight)
+            return;
+        _resizing = true;
+        _graphics.PreferredBackBufferWidth = size.Width;
+        _graphics.PreferredBackBufferHeight = size.Height;
+        _graphics.ApplyChanges();
+        _resizing = false;
+    }
+
+    private void UpdateDesktop()
+    {
+        var keys = Keyboard.GetState();
+        bool alt = keys.IsKeyDown(Keys.LeftAlt) || keys.IsKeyDown(Keys.RightAlt);
+        bool command = keys.IsKeyDown(Keys.LeftWindows) || keys.IsKeyDown(Keys.RightWindows);
+        bool control = keys.IsKeyDown(Keys.LeftControl) || keys.IsKeyDown(Keys.RightControl);
+        if (_input.NewKeys.Contains(Keys.F11) || (alt && _input.NewKeys.Contains(Keys.Enter)) ||
+            (command && control && _input.NewKeys.Contains(Keys.F)))
+            ApplyWindowMode(!_graphics.IsFullScreen);
+
+        // The ship is the pointer while playing with the mouse.
+        IsMouseVisible = !(_state == State.Playing && !_paused && _settings.MouseSteering && IsActive);
     }
 
     protected override void LoadContent()
@@ -106,8 +194,13 @@ public class UltraGame : Game
         _stateTime += dt;
 
         var pp = GraphicsDevice.PresentationParameters;
-        _layout.Update(pp.BackBufferWidth, pp.BackBufferHeight, !_input.HasTilt);
+        if (OutputTarget != null)
+            _layout.Update(OutputTarget.Width, OutputTarget.Height, false);
+        else
+            _layout.Update(pp.BackBufferWidth, pp.BackBufferHeight, !_input.HasTilt && !Platform.IsDesktop);
         _input.Update(_layout);
+        if (Platform.IsDesktop && OutputTarget == null)
+            UpdateDesktop();
 
         switch (_state)
         {
@@ -144,7 +237,8 @@ public class UltraGame : Game
 
         if (_input.BackPressed)
         {
-            if (OperatingSystem.IsAndroid())
+            // On a Mac, Command-Q quits.
+            if (OperatingSystem.IsAndroid() || OperatingSystem.IsWindows() || OperatingSystem.IsLinux())
                 Exit();
             return;
         }
@@ -273,6 +367,12 @@ public class UltraGame : Game
             return;
         }
 
+        if (Platform.IsDesktop)
+        {
+            UpdateDesktopOptions();
+            return;
+        }
+
         if (_input.NewKeys.Contains(Keys.Left) || _input.NewKeys.Contains(Keys.OemMinus))
             _settings.ChangeSensitivity(-1);
         if (_input.NewKeys.Contains(Keys.Right) || _input.NewKeys.Contains(Keys.OemPlus))
@@ -303,6 +403,32 @@ public class UltraGame : Game
                 int level = (p.X - SliderX) / SegmentW + 1;
                 _settings.ChangeSensitivity(level - _settings.TiltSensitivity);
             }
+        }
+    }
+
+    private void UpdateDesktopOptions()
+    {
+        if (_input.NewKeys.Contains(Keys.M))
+            _settings.ToggleMouseSteering();
+        if (_input.NewKeys.Contains(Keys.F))
+            ApplyWindowMode(!_graphics.IsFullScreen);
+
+        if (_stateTime < 0.3f)
+            return;
+
+        foreach (var tap in _input.Taps)
+        {
+            var p = tap.ToPoint();
+            if (DoneKey.Contains(p))
+            {
+                CloseOptions();
+                return;
+            }
+
+            if (MouseKey.Contains(p))
+                _settings.ToggleMouseSteering();
+            else if (FullScreenKey.Contains(p))
+                ApplyWindowMode(!_graphics.IsFullScreen);
         }
     }
 
@@ -414,7 +540,7 @@ public class UltraGame : Game
         }
         batch.End();
 
-        GraphicsDevice.SetRenderTarget(null);
+        GraphicsDevice.SetRenderTarget(OutputTarget);
         GraphicsDevice.Clear(PanelColor);
 
         batch.Begin(samplerState: SamplerState.PointClamp);
@@ -425,6 +551,8 @@ public class UltraGame : Game
             DrawOptionsIcon();
         batch.End();
 
+        if (OutputTarget != null)
+            GraphicsDevice.SetRenderTarget(null);
         base.Draw(gameTime);
     }
 
@@ -465,10 +593,12 @@ public class UltraGame : Game
 
         if ((int)(_clock / 3f) % 2 == 0)
             r.TextCentered("BY PFJ - BASED ON THE PSS ORIC GAME", 196, Palette.Magenta);
+        else if (Platform.IsDesktop)
+            r.TextCentered("MOUSE OR Z X TO MOVE - CLICK TO FIRE", 196, Palette.Cyan);
         else
             r.TextCentered(_input.HasTilt ? "TILT TO MOVE - TAP TO FIRE" : "ARROWS TO MOVE - TAP TO FIRE", 196, Palette.Cyan);
         if ((int)(_clock * 2f) % 2 == 0)
-            r.TextCentered("TOUCH TO PLAY", 210, Palette.Yellow);
+            r.TextCentered(Platform.IsDesktop ? "CLICK OR SPACE TO PLAY" : "TOUCH TO PLAY", 210, Palette.Yellow);
 
         DrawKey(PrevPageKey, "<", Palette.White);
         DrawKey(NextPageKey, ">", Palette.White);
@@ -482,15 +612,27 @@ public class UltraGame : Game
         r.TextCentered("HOW TO PLAY", 34, Palette.Cyan);
 
         string move = _input.HasTilt ? "TILT THE DEVICE TO STEER YOUR SHIP." : "USE THE ARROW BUTTONS TO MOVE.";
+        var controls = Platform.IsDesktop
+            ? new (string Text, Color Color)[]
+            {
+                ("MOVE WITH THE MOUSE, OR Z (LEFT) AND", Palette.Green),
+                ("X (RIGHT). THE ARROW KEYS WORK TOO.", Palette.Green),
+                ("CLICK OR PRESS SPACE TO FIRE - HOLD", Palette.Green),
+                ("IT DOWN FOR RAPID FIRE. P PAUSES.", Palette.Green),
+            }
+            : new (string Text, Color Color)[]
+            {
+                (move, Palette.Green),
+                ("TAP ANYWHERE TO FIRE. HOLD YOUR", Palette.Green),
+                ("FINGER DOWN FOR RAPID FIRE.", Palette.Green),
+                ("", Palette.White),
+            };
         var lines = new (string Text, Color Color)[]
         {
             ("DESTROY ALL 16 SHEETS OF ALIENS -", Palette.White),
             ("EACH SHEET MOVES IN ITS OWN WAY.", Palette.White),
             ("", Palette.White),
-            (move, Palette.Green),
-            ("TAP ANYWHERE TO FIRE. HOLD YOUR", Palette.Green),
-            ("FINGER DOWN FOR RAPID FIRE.", Palette.Green),
-            ("", Palette.White),
+            controls[0], controls[1], controls[2], controls[3],
             ("WATCH THE HEAT GAUGE! IF THE GUN", Palette.Yellow),
             ("OVERHEATS IT LOCKS UNTIL IT COOLS,", Palette.Yellow),
             ("AND THE HEAT CARRIES ON INTO THE", Palette.Yellow),
@@ -554,6 +696,12 @@ public class UltraGame : Game
         var r = _renderer;
         r.TextCentered("OPTIONS", 12, Palette.Yellow, 2f);
 
+        if (Platform.IsDesktop)
+        {
+            DrawDesktopOptions();
+            return;
+        }
+
         r.TextCentered("TILT SENSITIVITY", 48, Palette.Cyan);
         DrawKey(MinusKey, "-", Palette.White);
         DrawKey(PlusKey, "+", Palette.White);
@@ -581,6 +729,33 @@ public class UltraGame : Game
         }
         else
             r.TextCentered("NO MOTION SENSOR FOUND", 150, Palette.Red);
+
+        DrawKey(DoneKey, "DONE", Palette.Green);
+    }
+
+    private void DrawDesktopOptions()
+    {
+        var r = _renderer;
+        r.Text("MOUSE STEERING", 20, MouseKey.Y + 4, Palette.Cyan);
+        DrawKey(MouseKey, _settings.MouseSteering ? "ON" : "OFF", _settings.MouseSteering ? Palette.Green : Palette.White);
+        r.Text("FULL SCREEN", 20, FullScreenKey.Y + 4, Palette.Cyan);
+        DrawKey(FullScreenKey, _graphics.IsFullScreen ? "ON" : "OFF", _graphics.IsFullScreen ? Palette.Green : Palette.White);
+
+        string screenKeys = OperatingSystem.IsMacOS() ? "CMD CTRL F" : "F11, ALT+ENTER";
+        var lines = new (string Key, string Action)[]
+        {
+            ("MOVE", "MOUSE, Z X OR ARROWS"),
+            ("FIRE", "CLICK, SPACE OR CTRL"),
+            ("PAUSE", "P, ESC OR TOP-LEFT"),
+            ("SCREEN", screenKeys),
+            ("OPTIONS", "M MOUSE  F FULL SCREEN"),
+        };
+        r.TextCentered("CONTROLS", 100, Palette.Yellow);
+        for (int i = 0; i < lines.Length; i++)
+        {
+            r.Text(lines[i].Key, 20, 116 + i * 12, Palette.Cyan);
+            r.Text(lines[i].Action, 74, 116 + i * 12, Palette.White);
+        }
 
         DrawKey(DoneKey, "DONE", Palette.Green);
     }

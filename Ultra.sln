@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ultra.Android", "Ultra.Andr
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ultra.iOS", "Ultra.iOS\Ultra.iOS.csproj", "{9DDE4BA8-A825-4D4D-B810-7675A1B71986}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ultra.Desktop", "Ultra.Desktop\Ultra.Desktop.csproj", "{AE202CD0-6D90-4AC6-873A-8C861AD20CFE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -55,6 +57,18 @@ Global
 		{9DDE4BA8-A825-4D4D-B810-7675A1B71986}.Release|x64.Build.0 = Release|Any CPU
 		{9DDE4BA8-A825-4D4D-B810-7675A1B71986}.Release|x86.ActiveCfg = Release|Any CPU
 		{9DDE4BA8-A825-4D4D-B810-7675A1B71986}.Release|x86.Build.0 = Release|Any CPU
+		{AE202CD0-6D90-4AC6-873A-8C861AD20CFE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AE202CD0-6D90-4AC6-873A-8C861AD20CFE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AE202CD0-6D90-4AC6-873A-8C861AD20CFE}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{AE202CD0-6D90-4AC6-873A-8C861AD20CFE}.Debug|x64.Build.0 = Debug|Any CPU
+		{AE202CD0-6D90-4AC6-873A-8C861AD20CFE}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{AE202CD0-6D90-4AC6-873A-8C861AD20CFE}.Debug|x86.Build.0 = Debug|Any CPU
+		{AE202CD0-6D90-4AC6-873A-8C861AD20CFE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AE202CD0-6D90-4AC6-873A-8C861AD20CFE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AE202CD0-6D90-4AC6-873A-8C861AD20CFE}.Release|x64.ActiveCfg = Release|Any CPU
+		{AE202CD0-6D90-4AC6-873A-8C861AD20CFE}.Release|x64.Build.0 = Release|Any CPU
+		{AE202CD0-6D90-4AC6-873A-8C861AD20CFE}.Release|x86.ActiveCfg = Release|Any CPU
+		{AE202CD0-6D90-4AC6-873A-8C861AD20CFE}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

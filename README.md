@@ -1,6 +1,6 @@
 # The Ultra
 
-A MonoGame remake for **Android** and **iOS** of *The Ultra*, the 1983 arcade shooter published by PSS for the Oric-1 and Oric Atmos.
+A MonoGame remake for **Android**, **iOS**, **macOS** and **Windows** of *The Ultra*, the 1983 arcade shooter published by PSS for the Oric-1 and Oric Atmos.
 
 Written by **Paul F. Johnson**.
 
@@ -39,6 +39,14 @@ Options are saved (`ultra_settings.txt`) and restored when the game starts.
 
 The title screen cycles through three pages: **How to Play**, **Points per Alien** (every alien with its name and score) and the **Hall of Fame**. To move between pages yourself, swipe left or right, tap the ‹ › buttons in the bottom corners, or use the arrow keys. A page you choose stays on screen for longer before the cycle continues. Tap anywhere else to start a game.
 
+On **macOS and Windows** the game runs in a resizable window and is played with the mouse and keyboard:
+
+- **Move:** move the mouse and the ship follows the pointer (at the same top speed as the keys), or press **Z** (left) and **X** (right). The arrow keys work too. Pressing a key hands steering to the keyboard until the mouse moves again.
+- **Fire:** left click or **Space** (or Ctrl). Hold for rapid fire.
+- **Pause:** **P**, **Esc** or a click on the pause icon in the top-left corner. On the title screen, click or press Space to start; on Windows, Esc there quits (on a Mac use Command-Q).
+- **Full screen:** F11 or Alt+Enter, or Command-Control-F on a Mac.
+- **Options** (O on the title screen, or the slider icon) has Mouse steering on/off and Full screen on/off, and lists the controls. The How to Play page shows the desktop controls.
+
 Tilt uses the gyroscope-fused gravity vector: CoreMotion device motion on iOS and the `TYPE_GRAVITY` sensor on Android. On Android devices without a gyroscope it falls back to a filtered accelerometer. If the device has no motion sensor at all (for example the iOS Simulator), on-screen left and right buttons appear in the left margin instead. Hardware keyboards and game pads also work: arrow keys, Space or Ctrl to fire, P to pause, Esc to go back.
 
 ## Project layout
@@ -48,6 +56,10 @@ Tilt uses the gyroscope-fused gravity vector: CoreMotion device motion on iOS an
 | `Ultra.Core` | All game code (net10.0, MonoGame 3.8.5). It needs no content pipeline because graphics, font and sound are generated in code. |
 | `Ultra.Android` | Android host activity: fixed `SensorLandscape`, immersive full screen, adaptive icon, splash theme, tilt sensor |
 | `Ultra.iOS` | iOS host: landscape only, app icon set, `LaunchScreen.storyboard` splash, CoreMotion tilt sensor |
+| `Ultra.Desktop` | macOS and Windows host (MonoGame DesktopGL): window icon, `macOS/` (Info.plist, sandbox entitlements, native launcher, `.icns`) and `Windows/` (MSIX `AppxManifest.xml` and tile assets) |
+| `tools/build_desktop.sh` | Builds the signed Mac App Store `.pkg` and the Microsoft Store `.msix` packages (x64 and arm64) |
+| `tools/make_msix.py` | Writes an unsigned `.msix` without Windows tools (makeappx only runs on Windows) |
+| `tools/capture_screenshots.sh` | Captures the Mac App Store and Microsoft Store screenshots from the running game |
 | `tools/generate_art.py` | Regenerates every icon, splash image and store graphic from the game's own sprite and font data (requires Pillow) |
 | `tools/extract_original.py` | Regenerates `Ultra.Core/OriginalData.cs` from a tape image of the original game |
 | `tools/check_listing.py` | Checks the store listing text against each store's character limits |
@@ -68,9 +80,12 @@ Because the remake draws aliens at 1.5x, formations are re-spaced so aliens don'
 ```sh
 dotnet build Ultra.Android/Ultra.Android.csproj
 dotnet build Ultra.iOS/Ultra.iOS.csproj
+dotnet run --project Ultra.Desktop        # macOS or Windows
 ```
 
-You need the .NET 10 SDK with the `android` and `ios` workloads installed.
+You need the .NET 10 SDK with the `android` and `ios` workloads installed. The desktop build needs no workloads.
+
+To build the Mac App Store `.pkg` and the Microsoft Store `.msix` files into `release/`, run `tools/build_desktop.sh` (on a Mac). See `store/LISTING.md`.
 
 To build the signed store packages (Google Play .aab/.apk and App Store .ipa) into `release/`, run `tools/build_release.sh`. See `store/LISTING.md` for details of the signing setup.
 

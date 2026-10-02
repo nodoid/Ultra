@@ -110,13 +110,19 @@ public sealed class World
     public bool IsFinished => _phase == Phase.Over && _phaseTimer <= 0f;
     public bool IsGameOver => _phase == Phase.Over;
 
+    /// <summary>
+    /// Plays the game by itself and can't be hit. Used to capture store screenshots.
+    /// </summary>
+    public bool Autopilot { get; set; }
+
     private int Pattern => (Wave - 1) % Sheets;
     private int Cycle => (Wave - 1) / Sheets;
     private float Mult => 1f + 0.18f * Cycle;
 
-    public World(Sfx sfx)
+    public World(Sfx sfx, int startWave = 1)
     {
         _sfx = sfx;
+        Wave = startWave;
         for (int i = 0; i < _stars.Length; i++)
             _stars[i] = new Vector3(_rng.Next(Renderer.Width), PlayTop + _rng.Next(200), 4 + _rng.Next(16));
         SetupWave();
@@ -209,7 +215,16 @@ public sealed class World
         if (_invulnerable > 0f)
             _invulnerable -= dt;
 
-        _playerX = Math.Clamp(_playerX + input.Move * PlayerSpeed * dt, 14f, 226f);
+        // The mouse steers towards the pointer at the same top speed as the keys.
+        float move = input.PointerX is float target ? Math.Clamp((target - _playerX) / 4f, -1f, 1f) : input.Move;
+        bool fire = input.Fire;
+        if (Autopilot)
+        {
+            var nearest = _aliens.Where(a => a.Alive).OrderBy(a => Math.Abs(a.X - _playerX)).FirstOrDefault();
+            move = nearest == null ? 0f : Math.Clamp((nearest.X - _playerX) / 4f, -1f, 1f);
+            fire = Heat < 70f;
+        }
+        _playerX = Math.Clamp(_playerX + move * PlayerSpeed * dt, 14f, 226f);
 
         _fireCooldown -= dt;
         if (Overheated)
@@ -221,7 +236,7 @@ public sealed class World
         else
         {
             Heat -= Cooling * dt;
-            if (input.Fire && _fireCooldown <= 0f && _shots.Count < 8)
+            if (fire && _fireCooldown <= 0f && _shots.Count < 8)
             {
                 _shots.Add(new Projectile { X = _playerX, Y = PlayerY - 12f - ShotLength });
                 _fireCooldown = FireInterval;
@@ -335,7 +350,7 @@ public sealed class World
         }
         _shots.RemoveAll(s => s.Y < -50f);
 
-        if (!_playerAlive || _invulnerable > 0f)
+        if (!_playerAlive || _invulnerable > 0f || Autopilot)
             return;
 
         foreach (var b in _bombs)

@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Windows and macOS build (MonoGame DesktopGL). tools/build_desktop.sh packages it for the
+       Microsoft Store (MSIX) and the Mac App Store (.pkg). -->
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>TheUltra</AssemblyName>
+    <RootNamespace>Ultra.Desktop</RootNamespace>
+    <Product>The Ultra</Product>
+    <!-- Version shown to players; the build number goes up with every Mac App Store upload.
+         The MSIX version is $(Version).0 and must also go up with every Microsoft Store submission. -->
+    <Version>1.0.1</Version>
+    <BuildNumber>2</BuildNumber>
+    <Authors>Paul F. Johnson</Authors>
+    <Copyright>Copyright © 2026 Paul F. Johnson</Copyright>
+    <ApplicationIcon>Icon.ico</ApplicationIcon>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+    <Nullable>disable</Nullable>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- Window icon, loaded by MonoGame at start-up. -->
+    <EmbeddedResource Include="Icon.ico" LogicalName="Icon.ico" />
+    <EmbeddedResource Include="Icon.bmp" LogicalName="Icon.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="macOS\**;Windows\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Ultra.Core\Ultra.Core.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.5.1" />
+  </ItemGroup>
+</Project>

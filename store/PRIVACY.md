@@ -13,13 +13,13 @@ The Ultra is a game written by Paul F. Johnson. This policy explains how the app
 The game saves two small files in its private storage on your device:
 
 - **High scores:** the names you enter in the Hall of Fame, with your scores and the sheet you reached.
-- **Settings:** your tilt sensitivity and invert-tilt choice.
+- **Settings:** your tilt sensitivity and invert-tilt choice (on a Mac or PC, your mouse steering and full screen choices).
 
 These files never leave your device. They are deleted when you uninstall the app.
 
 ## Motion sensors
 
-The game reads your device's motion sensors (gyroscope and accelerometer) only while you're playing, to steer the ship. The readings are used on the spot and are never stored or sent anywhere.
+On phones and tablets, the game reads your device's motion sensors (gyroscope and accelerometer) only while you're playing, to steer the ship. The readings are used on the spot and are never stored or sent anywhere.
 
 ## Children
 
