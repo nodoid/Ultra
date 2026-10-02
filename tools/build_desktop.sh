@@ -1,12 +1,13 @@
 #!/bin/zsh
 # Builds the desktop store packages into release/:
-#   release/macos/The Ultra.app   (signed for the Mac App Store, for checking before upload)
+#   release/macos/The Ultra.app   (universal: Apple silicon and Intel; signed for the Mac App Store)
 #   release/macos/TheUltra.pkg    (upload to App Store Connect with Transporter)
 #   release/windows/TheUltra-<version>-<x64|arm64>.msix  (upload both to Partner Center; the Store signs them)
 #   release/windows/TheUltra-<version>-<x64|arm64>.zip   (the same game unpackaged, for testing on a PC)
 #
-# Mac signing uses "Apple Distribution: Paul Johnson (3UH7BE38T3)", the rel-ultra-mac profile
-# (~/Downloads/relultramac.provisionprofile, or set ULTRA_MAC_PROFILE) and
+# Mac signing uses "Apple Distribution: Paul Johnson (3UH7BE38T3)", a Mac App Store profile of type
+# macOS (not Mac Catalyst) for uk.co.allthejohnsons.theultra
+# (~/Downloads/relultramac-2.provisionprofile, or set ULTRA_MAC_PROFILE) and
 # "3rd Party Mac Developer Installer: Paul Johnson (3UH7BE38T3)" for the .pkg.
 #
 #   tools/build_desktop.sh          both platforms
@@ -22,7 +23,7 @@ WHAT=${1:-all}
 
 APP_SIGN="Apple Distribution: Paul Johnson (3UH7BE38T3)"
 PKG_SIGN="3rd Party Mac Developer Installer: Paul Johnson (3UH7BE38T3)"
-PROFILE=${ULTRA_MAC_PROFILE:-$HOME/Downloads/relultramac.provisionprofile}
+PROFILE=${ULTRA_MAC_PROFILE:-$HOME/Downloads/relultramac-2.provisionprofile}
 
 build_mac() {
   local out=release/macos
@@ -30,17 +31,18 @@ build_mac() {
   local tmp=$(mktemp -d)
   rm -rf $out && mkdir -p $out
 
-  # Apple silicon only (the Mac App Store accepts that for macOS 12 and later).
-  dotnet publish $PROJECT -c Release -r osx-arm64 --self-contained -o $tmp/publish \
-    -p:DebugType=none -p:GenerateDocumentationFile=false
-
-  mkdir -p "$app/Contents/MacOS" "$app/Contents/MonoBundle" "$app/Contents/Resources"
-  cp -R $tmp/publish/. "$app/Contents/MonoBundle/"
-  # The runtime is started by the launcher below; these aren't needed in the app.
-  rm -f "$app/Contents/MonoBundle/TheUltra" "$app/Contents/MonoBundle/createdump"
+  # Universal: a runtime for each architecture in Contents/MonoBundle/<arch>; the universal
+  # launcher picks the one it is running as.
+  mkdir -p "$app/Contents/MacOS" "$app/Contents/Resources"
+  for arch in arm64 x64; do
+    dotnet publish $PROJECT -c Release -r osx-$arch --self-contained -o "$app/Contents/MonoBundle/$arch" \
+      -p:DebugType=none -p:GenerateDocumentationFile=false
+    # The runtime is started by the launcher below; these aren't needed in the app.
+    rm -f "$app/Contents/MonoBundle/$arch/TheUltra" "$app/Contents/MonoBundle/$arch/createdump"
+  done
 
   local sdk=$(xcrun --sdk macosx --show-sdk-version)
-  clang -O2 -arch arm64 -mmacosx-version-min=12.0 -isysroot "$(xcrun --sdk macosx --show-sdk-path)" \
+  clang -O2 -arch arm64 -arch x86_64 -mmacosx-version-min=12.0 -isysroot "$(xcrun --sdk macosx --show-sdk-path)" \
     -framework AppKit -o "$app/Contents/MacOS/TheUltra" Ultra.Desktop/macOS/launcher.c
   cp Ultra.Desktop/macOS/AppIcon.icns "$app/Contents/Resources/"
   sed -e "s/\$(VERSION)/$VERSION/" -e "s/\$(BUILD)/$BUILD/" Ultra.Desktop/macOS/Info.plist > "$app/Contents/Info.plist"
@@ -60,6 +62,12 @@ build_mac() {
   security cms -D -i "$PROFILE" > $tmp/profile.plist
   local app_id=$(plutil -extract Entitlements.application-identifier raw $tmp/profile.plist)
   local team_id=$(plutil -extract Entitlements.com\\.apple\\.developer\\.team-identifier raw $tmp/profile.plist)
+  # A Mac Catalyst profile (TEAM.maccatalyst.<id>) is rejected for a native macOS app (ITMS-90286).
+  local bundle_id=$(plutil -extract CFBundleIdentifier raw "$app/Contents/Info.plist")
+  if [[ $app_id != "$team_id.$bundle_id" ]]; then
+    echo "error: $PROFILE is for $app_id; the Mac App Store needs a macOS profile for $team_id.$bundle_id" >&2
+    exit 1
+  fi
   sed -e "s/\$(APP_ID)/$app_id/" -e "s/\$(TEAM_ID)/$team_id/" Ultra.Desktop/macOS/Entitlements.plist > $tmp/entitlements.plist
   cp "$PROFILE" "$app/Contents/embedded.provisionprofile"
 

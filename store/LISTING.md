@@ -19,7 +19,7 @@ Everything you need to paste into Google Play Console, App Store Connect (iOS an
 | Support email | paul@all-the-johnsons.co.uk |
 | Privacy policy URL | *(host `store/PRIVACY.md` publicly and paste the URL here)* |
 | Website (optional) | *(your site)* |
-| Supported devices | Android phones and tablets, iPhone, iPad, Macs with Apple silicon (macOS 12 or later), Windows 10/11 PCs (x64 and Arm) |
+| Supported devices | Android phones and tablets, iPhone, iPad, Macs with Apple silicon or Intel (macOS 12 or later), Windows 10/11 PCs (x64 and Arm) |
 | Orientation | Landscape only |
 
 ---
@@ -226,7 +226,7 @@ Written by PFJ. Based on the PSS Oric game.
 Move the mouse to steer (or Z and X), click or press Space to fire. P or Esc pauses. Options (O on the title screen) has mouse steering and full screen.
 ```
 
-**Requirements:** macOS 12 or later on a Mac with Apple silicon. The app is sandboxed and asks for no other permissions.
+**Requirements:** macOS 12 or later, on Apple silicon or Intel Macs (universal app). The app is sandboxed and asks for no other permissions.
 
 ---
 
@@ -322,7 +322,7 @@ For the Mac and Windows packages, run `tools/build_desktop.sh` (or `tools/build_
 | `release/windows/TheUltra-<version>-x64.msix`, `-arm64.msix` | Upload both to Partner Center |
 | `release/windows/TheUltra-<version>-x64.zip`, `-arm64.zip` | The game unpackaged: unzip on a PC and run `TheUltra.exe` to test |
 
-**Mac signing:** the app is signed with "Apple Distribution: Paul Johnson (3UH7BE38T3)" and the `rel-ultra-mac` profile (read from `~/Downloads/relultramac.provisionprofile`, or set `ULTRA_MAC_PROFILE`), and the .pkg with "3rd Party Mac Developer Installer: Paul Johnson (3UH7BE38T3)". The app is Apple silicon only, which the Mac App Store accepts for macOS 12 and later.
+**Mac signing:** the app is signed with "Apple Distribution: Paul Johnson (3UH7BE38T3)" and a Mac App Store profile of type **macOS** (not Mac Catalyst) for `uk.co.allthejohnsons.theultra` (read from `~/Downloads/relultramac-2.provisionprofile`, or set `ULTRA_MAC_PROFILE`; the script stops if given a Catalyst profile), and the .pkg with "3rd Party Mac Developer Installer: Paul Johnson (3UH7BE38T3)". The app is universal: `Contents/MonoBundle` holds a .NET runtime for each architecture (`arm64`, `x64`) and the universal launcher in `Contents/MacOS` starts the one that matches the Mac.
 
 **Windows packaging:** `tools/make_msix.py` builds the .msix on the Mac. The packages are unsigned, which is what the Store expects.
 

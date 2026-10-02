@@ -1,5 +1,6 @@
 /*
- * Contents/MacOS/TheUltra: starts the .NET runtime in Contents/MonoBundle and runs the game
+ * Contents/MacOS/TheUltra: starts the .NET runtime in Contents/MonoBundle/<arm64|x64> (built as a
+ * universal binary, so each architecture uses its own copy of the runtime) and runs the game
  * in this process, so the app keeps this executable's signature and sandbox entitlements.
  * Built by tools/build_desktop.sh.
  */
@@ -13,6 +14,12 @@
 /* AppKit: connects to the window server and registers with LaunchServices. */
 extern int NSApplicationLoad(void);
 
+#if defined(__arm64__)
+#define RUNTIME_DIR "arm64"
+#else
+#define RUNTIME_DIR "x64"
+#endif
+
 typedef int (*hostfxr_main_startupinfo_fn)(int argc, const char **argv, const char *host_path,
                                            const char *dotnet_root, const char *app_path);
 
@@ -24,7 +31,7 @@ int main(int argc, const char **argv)
 
     if (_NSGetExecutablePath(exe, &size) != 0 || realpath(exe, real) == NULL)
         return 1;
-    snprintf(path, sizeof path, "%s/../MonoBundle", dirname(real));
+    snprintf(path, sizeof path, "%s/../MonoBundle/" RUNTIME_DIR, dirname(real));
     if (realpath(path, root) == NULL)
     {
         fprintf(stderr, "The Ultra: %s not found\n", path);
