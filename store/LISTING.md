@@ -181,7 +181,12 @@ App Store Connect scales these down for the smaller displays automatically.
 
 ## Mac App Store (App Store Connect)
 
-The Mac version is a separate build of the same app (bundle ID `uk.co.allthejohnsons.theultra`). In App Store Connect, add the **macOS** platform to the existing app, then fill in the macOS version page. Name, subtitle, keywords, privacy answers and age rating are as for iOS above.
+The Mac version is its own App Store Connect app, **The Ultra Mac** (bundle ID `uk.co.allthejohnsons.ultramac`). Subtitle, keywords, privacy answers and age rating are as for iOS above.
+
+**Name** (30 max)
+```
+The Ultra Mac
+```
 
 **Promotional text** (170 max)
 ```
@@ -322,7 +327,7 @@ For the Mac and Windows packages, run `tools/build_desktop.sh` (or `tools/build_
 | `release/windows/TheUltra-<version>-x64.msix`, `-arm64.msix` | Upload both to Partner Center |
 | `release/windows/TheUltra-<version>-x64.zip`, `-arm64.zip` | The game unpackaged: unzip on a PC and run `TheUltra.exe` to test |
 
-**Mac signing:** the app is signed with "Apple Distribution: Paul Johnson (3UH7BE38T3)" and a Mac App Store profile of type **macOS** (not Mac Catalyst) for `uk.co.allthejohnsons.theultra` (read from `~/Downloads/relultramac-2.provisionprofile`, or set `ULTRA_MAC_PROFILE`; the script stops if given a Catalyst profile), and the .pkg with "3rd Party Mac Developer Installer: Paul Johnson (3UH7BE38T3)". The app is universal: `Contents/MonoBundle` holds a .NET runtime for each architecture (`arm64`, `x64`) and the universal launcher in `Contents/MacOS` starts the one that matches the Mac.
+**Mac signing:** the app is signed with "Apple Distribution: Paul Johnson (3UH7BE38T3)" and a Mac App Store profile of type **macOS** (not Mac Catalyst) for `uk.co.allthejohnsons.ultramac` (`rel-ultra-mac`, read from `~/Downloads/relultramac.provisionprofile`, or set `ULTRA_MAC_PROFILE`; the script stops if given a Catalyst profile), and the .pkg with "3rd Party Mac Developer Installer: Paul Johnson (3UH7BE38T3)". The app is universal: `Contents/MonoBundle` holds a .NET runtime for each architecture (`arm64`, `x64`) and the universal launcher in `Contents/MacOS` starts the one that matches the Mac.
 
 **Windows packaging:** `tools/make_msix.py` builds the .msix on the Mac. The packages are unsigned, which is what the Store expects.
 

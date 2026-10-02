@@ -6,8 +6,8 @@
 #   release/windows/TheUltra-<version>-<x64|arm64>.zip   (the same game unpackaged, for testing on a PC)
 #
 # Mac signing uses "Apple Distribution: Paul Johnson (3UH7BE38T3)", a Mac App Store profile of type
-# macOS (not Mac Catalyst) for uk.co.allthejohnsons.theultra
-# (~/Downloads/relultramac-2.provisionprofile, or set ULTRA_MAC_PROFILE) and
+# macOS (not Mac Catalyst) for uk.co.allthejohnsons.ultramac
+# (~/Downloads/relultramac.provisionprofile, or set ULTRA_MAC_PROFILE) and
 # "3rd Party Mac Developer Installer: Paul Johnson (3UH7BE38T3)" for the .pkg.
 #
 #   tools/build_desktop.sh          both platforms
@@ -23,7 +23,7 @@ WHAT=${1:-all}
 
 APP_SIGN="Apple Distribution: Paul Johnson (3UH7BE38T3)"
 PKG_SIGN="3rd Party Mac Developer Installer: Paul Johnson (3UH7BE38T3)"
-PROFILE=${ULTRA_MAC_PROFILE:-$HOME/Downloads/relultramac-2.provisionprofile}
+PROFILE=${ULTRA_MAC_PROFILE:-$HOME/Downloads/relultramac.provisionprofile}
 
 build_mac() {
   local out=release/macos
